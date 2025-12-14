@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://{SEU_BACKEND_DOMAIN}/api'
+  apiUrl: 'https://finance-app-5ltv.onrender.com/api'
 };
 
 
