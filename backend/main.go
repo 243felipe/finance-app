@@ -34,6 +34,11 @@ func main() {
 	authHandler := handlers.AuthHandler{DB: pool, JWTSecret: cfg.JWTSecret}
 	productHandler := handlers.ProductHandler{DB: pool}
 
+	// Responde na raiz para evitar 404 em verificações externas.
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
+
 	api := router.Group("/api")
 	{
 		api.GET("/health", func(c *gin.Context) {
@@ -57,7 +62,3 @@ func main() {
 		log.Fatalf("erro ao subir servidor: %v", err)
 	}
 }
-
-
-
-
