@@ -1,0 +1,56 @@
+<div class="login-page">
+  <div class="hero-bg"></div>
+
+  <div class="login-card">
+    <!-- <div class="brand">
+      <div class="logo-placeholder">
+        SuaLogo<span>#</span>
+      </div>
+      <p class="brand-subtitle">Acesse para continuar</p>
+    </div> -->
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+      <div class="field-group">
+        <label for="email">Usuário</label>
+        <div class="input-wrapper">
+          <i class="pi pi-user"></i>
+          <input
+            pInputText
+            id="email"
+            formControlName="email"
+            autocomplete="email"
+            placeholder="Digite seu usuário"
+          />
+        </div>
+        <small *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="error">
+          Informe um e-mail válido.
+        </small>
+      </div>
+
+      <div class="field-group">
+        <label for="password">Senha</label>
+        <div class="input-wrapper">
+          <i class="pi pi-lock"></i>
+          <p-password
+            inputId="password"
+            formControlName="password"
+            [feedback]="false"
+            toggleMask="true"
+            placeholder="Digite sua senha"
+            autocomplete="current-password"
+          ></p-password>
+        </div>
+        <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched" class="error">
+          Senha é obrigatória.
+        </small>
+      </div>
+
+      <button pButton type="submit" label="Entrar" [loading]="loading" class="submit-btn"></button>
+    </form>
+  </div>
+</div>
+
+
+
+
+

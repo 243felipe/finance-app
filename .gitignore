@@ -1,0 +1,29 @@
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Node / Angular
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.vercel/
+
+# Build / temp
+dist/
+tmp/
+.tmp/
+.DS_Store
+
+# Go / backend secrets
+backend/.env
+backend/.env.*
+backend/bin/
+backend/tmp/
+
+# IDE / tooling
+.vscode/
+*.swp

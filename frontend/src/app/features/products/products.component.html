@@ -1,0 +1,89 @@
+<p-confirmDialog></p-confirmDialog>
+
+<section class="card-surface products-card">
+  <div class="header">
+    <div>
+      <p class="eyebrow">Produtos</p>
+      <h2>Catálogo do estoque</h2>
+      <p class="muted">Cadastre, edite ou remova produtos.</p>
+    </div>
+    <button pButton label="Novo produto" icon="pi pi-plus" (click)="openNew()"></button>
+  </div>
+
+  <p-table [value]="products" dataKey="id" [loading]="loading" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nome</th>
+        <th>SKU</th>
+        <th>Preço</th>
+        <th>Quantidade</th>
+        <th style="width: 140px"></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-product>
+      <tr>
+        <td>{{ product.name }}</td>
+        <td><span class="sku">{{ product.sku }}</span></td>
+        <td>R$ {{ product.price | number: '1.2-2' }}</td>
+        <td>
+          <p-tag [severity]="product.quantity > 0 ? 'success' : 'danger'" [value]="product.quantity"></p-tag>
+        </td>
+        <td class="actions">
+          <button pButton icon="pi pi-pencil" class="p-button-text" (click)="edit(product)"></button>
+          <button pButton icon="pi pi-trash" class="p-button-text p-button-danger" (click)="confirmDelete(product)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>
+
+<p-dialog
+  header="{{ editingProduct ? 'Editar produto' : 'Novo produto' }}"
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{ width: '400px' }"
+  [closable]="false"
+>
+  <form [formGroup]="form" class="dialog-form">
+    <div class="field">
+      <label for="name">Nome</label>
+      <input id="name" type="text" pInputText formControlName="name" />
+      <small *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="error">Informe o nome.</small>
+    </div>
+
+    <div class="field">
+      <label for="sku">SKU</label>
+      <input id="sku" type="text" pInputText formControlName="sku" />
+      <small *ngIf="form.get('sku')?.invalid && form.get('sku')?.touched" class="error">SKU é obrigatório.</small>
+    </div>
+
+    <div class="field">
+      <label for="price">Preço</label>
+      <p-inputNumber
+        id="price"
+        formControlName="price"
+        mode="currency"
+        currency="BRL"
+        locale="pt-BR"
+        inputId="currency-brl"
+      ></p-inputNumber>
+      <small *ngIf="form.get('price')?.invalid && form.get('price')?.touched" class="error">Preço inválido.</small>
+    </div>
+
+    <div class="field">
+      <label for="quantity">Quantidade</label>
+      <p-inputNumber id="quantity" formControlName="quantity" [min]="0"></p-inputNumber>
+      <small *ngIf="form.get('quantity')?.invalid && form.get('quantity')?.touched" class="error">Quantidade inválida.</small>
+    </div>
+
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="dialogVisible = false"></button>
+      <button pButton type="button" label="Salvar" [loading]="saving" (click)="save()" autofocus></button>
+    </div>
+  </form>
+</p-dialog>
+
+
+
+
+
