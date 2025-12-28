@@ -1,0 +1,69 @@
+<div class="dashboard">
+  <header class="board-header">
+    <div class="title">
+      <h2>Dashboard</h2>
+      <p>Visão geral dos principais indicadores</p>
+    </div>
+  </header>
+
+  <section class="cards">
+    <div class="card" *ngFor="let card of cards">
+      <div class="card-icon">
+        <i [class]="card.icon"></i>
+      </div>
+      <div class="card-body">
+        <p class="label">{{ card.label }}</p>
+        <p class="value">{{ card.value }}</p>
+        <p class="change" *ngIf="card.change">{{ card.change }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid-panels">
+    <div class="panel">
+      <h3>Distribuição</h3>
+      <p-chart type="pie" [data]="pieData" [options]="pieOptions" height="240px"></p-chart>
+    </div>
+
+    <div class="panel">
+      <h3>Progresso</h3>
+      <div class="progress-list">
+        <div class="progress-item" *ngFor="let item of progress">
+          <div class="row">
+            <span>{{ item.label }}</span>
+            <span class="value">{{ item.value }}%</span>
+          </div>
+          <p-progressBar [value]="item.value"></p-progressBar>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel notifications">
+      <h3>Notificações</h3>
+      <div class="notif" *ngFor="let n of notifications">
+        <div class="dot" [ngClass]="n.type"></div>
+        <div class="body">
+          <p class="title">{{ n.title }}</p>
+          <p class="time">{{ n.time }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hero-chart">
+    <div class="hero-card">
+      <div class="hero-top">
+        <div>
+          <p class="eyebrow">Evolução</p>
+          <h3>Métricas principais</h3>
+        </div>
+        <button pButton label="Filtrar" class="p-button-text p-button-sm"></button>
+      </div>
+      <div class="chart-wrapper">
+        <p-chart type="line" [data]="lineData" [options]="lineOptions" height="260px"></p-chart>
+      </div>
+    </div>
+  </section>
+
+  
+</div>

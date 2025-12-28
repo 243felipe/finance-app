@@ -1,56 +1,60 @@
-<div class="login-page">
-  <div class="hero-bg"></div>
+<div class="login-layout">
+  <div class="illustration">
+    <div class="image-overlay"></div>
+  </div>
 
-  <div class="login-card">
-    <!-- <div class="brand">
-      <div class="logo-placeholder">
-        SuaLogo<span>#</span>
+  <div class="form-side">
+    <div class="form-card">
+      <div class="brand-logo">
+        <img src="/images/logo_unica_login.png" alt="Logo" />
       </div>
-      <p class="brand-subtitle">Acesse para continuar</p>
-    </div> -->
+      <h1>Incret Finanças</h1>
+      <p class="subtitle">Confiança que gera resultados</p>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="form">
-      <div class="field-group">
-        <label for="email">Usuário</label>
-        <div class="input-wrapper">
-          <i class="pi pi-user"></i>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="form" novalidate>
+        <div class="field-group">
+          <label for="login">Email</label>
           <input
             pInputText
-            id="email"
-            formControlName="email"
-            autocomplete="email"
-            placeholder="Digite seu usuário"
+            id="login"
+            formControlName="login"
+            autocomplete="username"
+            placeholder="Digite seu email"
           />
+          <small *ngIf="form.get('login')?.invalid && form.get('login')?.touched" class="error">
+            Informe o e-mail.
+          </small>
         </div>
-        <small *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="error">
-          Informe um e-mail válido.
-        </small>
-      </div>
 
-      <div class="field-group">
-        <label for="password">Senha</label>
-        <div class="input-wrapper">
-          <i class="pi pi-lock"></i>
+        <div class="field-group">
+          <label for="password">Senha</label>
           <p-password
             inputId="password"
             formControlName="password"
             [feedback]="false"
             toggleMask="true"
-            placeholder="Digite sua senha"
+            styleClass="password-field"
+            inputStyleClass="text-input"
+            placeholder="••••••••"
             autocomplete="current-password"
           ></p-password>
+          <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched" class="error">
+            Informe a senha.
+          </small>
         </div>
-        <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched" class="error">
-          Senha é obrigatória.
-        </small>
-      </div>
 
-      <button pButton type="submit" label="Entrar" [loading]="loading" class="submit-btn"></button>
-    </form>
+        <div class="form-actions">
+          <label class="remember">
+            <input type="checkbox" />
+            <span>Lembrar-me</span>
+          </label>
+          <button type="button" class="link-btn" (click)="solicitarAjuda()">Esqueceu a senha?</button>
+        </div>
+
+        <button pButton type="submit" label="Acessar" [loading]="loading" class="submit-btn"></button>
+      </form>
+
+      
+    </div>
   </div>
 </div>
-
-
-
-
-

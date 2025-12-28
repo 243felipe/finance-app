@@ -33,6 +33,11 @@ func main() {
 
 	authHandler := handlers.AuthHandler{DB: pool, JWTSecret: cfg.JWTSecret}
 	productHandler := handlers.ProductHandler{DB: pool}
+	financialCategoryHandler := handlers.FinancialCategoryHandler{DB: pool}
+	fixedAccountHandler := handlers.FixedAccountHandler{DB: pool}
+	fonteRendaHandler := handlers.FonteRendaHandler{DB: pool}
+	formaPagamentoHandler := handlers.FormaPagamentoHandler{DB: pool}
+	lancamentoHandler := handlers.LancamentoHandler{DB: pool}
 
 	// Responde na raiz para evitar 404 em verificações externas.
 	router.GET("/", func(c *gin.Context) {
@@ -54,6 +59,37 @@ func main() {
 			secured.POST("/products", productHandler.Create)
 			secured.PUT("/products/:id", productHandler.Update)
 			secured.DELETE("/products/:id", productHandler.Delete)
+
+			secured.GET("/categorias-financeiras", financialCategoryHandler.List)
+			secured.GET("/categorias-financeiras/:id", financialCategoryHandler.Get)
+			secured.POST("/categorias-financeiras", financialCategoryHandler.Create)
+			secured.PUT("/categorias-financeiras/:id", financialCategoryHandler.Update)
+			secured.DELETE("/categorias-financeiras/:id", financialCategoryHandler.Delete)
+
+			secured.GET("/contas-fixas", fixedAccountHandler.List)
+			secured.GET("/contas-fixas/:id", fixedAccountHandler.Get)
+			secured.GET("/contas-fixas/total", fixedAccountHandler.Total)
+			secured.POST("/contas-fixas", fixedAccountHandler.Create)
+			secured.PUT("/contas-fixas/:id", fixedAccountHandler.Update)
+			secured.DELETE("/contas-fixas/:id", fixedAccountHandler.Delete)
+
+			secured.GET("/fontes-renda", fonteRendaHandler.List)
+			secured.GET("/fontes-renda/:id", fonteRendaHandler.Get)
+			secured.POST("/fontes-renda", fonteRendaHandler.Create)
+			secured.PUT("/fontes-renda/:id", fonteRendaHandler.Update)
+			secured.DELETE("/fontes-renda/:id", fonteRendaHandler.Delete)
+
+			secured.GET("/formas-pagamento", formaPagamentoHandler.List)
+			secured.GET("/formas-pagamento/:id", formaPagamentoHandler.Get)
+			secured.POST("/formas-pagamento", formaPagamentoHandler.Create)
+			secured.PUT("/formas-pagamento/:id", formaPagamentoHandler.Update)
+			secured.DELETE("/formas-pagamento/:id", formaPagamentoHandler.Delete)
+
+			secured.GET("/lancamentos", lancamentoHandler.List)
+			secured.GET("/lancamentos/:id", lancamentoHandler.Get)
+			secured.POST("/lancamentos", lancamentoHandler.Create)
+			secured.PUT("/lancamentos/:id", lancamentoHandler.Update)
+			secured.DELETE("/lancamentos/:id", lancamentoHandler.Delete)
 		}
 	}
 
@@ -62,4 +98,3 @@ func main() {
 		log.Fatalf("erro ao subir servidor: %v", err)
 	}
 }
-

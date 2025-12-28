@@ -1,144 +1,113 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ToolbarModule } from 'primeng/toolbar';
-import { TagModule } from 'primeng/tag';
-import { MessageService, ConfirmationService } from 'primeng/api';
 
-import { Product } from '../../models/product';
-import { ProductService } from '../../services/product.service';
+/**
+ * Tela referência de layout (filtro + grid + botões + modal).
+ * Usar como padrão para demais telas.
+ */
 
 @Component({
   selector: 'app-products',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule,
     TableModule,
     ButtonModule,
     DialogModule,
-    InputTextModule,
-    InputNumberModule,
-    ConfirmDialogModule,
-    ToolbarModule,
-    TagModule
+    InputTextModule
   ],
-  providers: [ConfirmationService],
   templateUrl: './products.component.html',
-  styleUrl: './products.component.scss'
+  styleUrls: ['./products.component.scss']
 })
-export class ProductsComponent implements OnInit {
-  products: Product[] = [];
-  form: FormGroup;
+export class ProductsComponent {
+  filtroDescricao = '';
   dialogVisible = false;
   saving = false;
-  loading = false;
-  editingProduct?: Product;
+  editingIndex: number | null = null;
+  selecionado: any[] = [];
 
-  constructor(
-    private fb: FormBuilder,
-    private productService: ProductService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService
-  ) {
+  categorias = [
+    { label: 'Categoria A', value: 'A' },
+    { label: 'Categoria B', value: 'B' },
+    { label: 'Categoria C', value: 'C' }
+  ];
+
+  itens = [
+    { descricao: 'Notebook X', sku: 'NTX-001', categoria: 'A' },
+    { descricao: 'Mouse Sem Fio', sku: 'MSW-010', categoria: 'B' },
+    { descricao: 'Teclado Mecânico', sku: 'TLM-500', categoria: 'B' },
+    { descricao: 'Monitor 27"', sku: 'MON-270', categoria: 'C' }
+  ];
+
+  form!: FormGroup;
+  constructor(private fb: FormBuilder) {
     this.form = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
+      descricao: ['', [Validators.required, Validators.minLength(3)]],
       sku: ['', [Validators.required, Validators.minLength(3)]],
-      price: [0, [Validators.required, Validators.min(0)]],
-      quantity: [0, [Validators.required, Validators.min(0)]]
+      detalhe: ['', [Validators.required, Validators.minLength(3)]],
+      categoria: [null, [Validators.required]]
     });
   }
 
-  ngOnInit(): void {
-    this.loadProducts();
+  get itensFiltrados() {
+    const f = this.filtroDescricao.trim().toLowerCase();
+    if (!f) return this.itens;
+    return this.itens.filter((i) => i.descricao.toLowerCase().includes(f));
   }
 
-  loadProducts(): void {
-    this.loading = true;
-    this.productService.list().subscribe({
-      next: (data) => {
-        this.products = data;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao carregar produtos.' });
-      }
+  pesquisar(): void {
+    // filtro é aplicado pelo getter; mantemos o handler para o botão
+  }
+
+  abrirModal(): void {
+    this.editingIndex = null;
+    this.dialogVisible = true;
+    this.form.reset();
+  }
+
+  editar(): void {
+    if (!this.selecionado || this.selecionado.length !== 1) return;
+    const item = this.selecionado[0];
+    this.editingIndex = this.itens.indexOf(item);
+    this.form.reset({
+      descricao: item.descricao,
+      sku: item.sku,
+      detalhe: item.detalhe ?? '',
+      categoria: item.categoria ?? null
     });
-  }
-
-  openNew(): void {
     this.dialogVisible = true;
-    this.editingProduct = undefined;
-    this.form.reset({ price: 0, quantity: 0 });
   }
 
-  edit(product: Product): void {
-    this.editingProduct = product;
-    this.dialogVisible = true;
-    this.form.patchValue(product);
-  }
-
-  save(): void {
+  salvar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-
-    const payload = this.form.value as Product;
     this.saving = true;
-
-    const request$ = this.editingProduct?.id
-      ? this.productService.update(this.editingProduct.id, payload)
-      : this.productService.create(payload);
-
-    request$.subscribe({
-      next: () => {
-        this.saving = false;
-        this.dialogVisible = false;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Sucesso',
-          detail: this.editingProduct ? 'Produto atualizado.' : 'Produto criado.'
-        });
-        this.loadProducts();
-      },
-      error: () => {
-        this.saving = false;
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Não foi possível salvar.' });
-      }
-    });
+    const novo = this.form.value;
+    if (this.editingIndex !== null && this.editingIndex >= 0) {
+      const clone = [...this.itens];
+      clone[this.editingIndex] = { ...clone[this.editingIndex], ...novo };
+      this.itens = clone;
+    } else {
+      this.itens = [...this.itens, novo];
+    }
+    this.saving = false;
+    this.dialogVisible = false;
+    this.editingIndex = null;
   }
 
-  confirmDelete(product: Product): void {
-    this.confirmationService.confirm({
-      message: `Excluir o produto "${product.name}"?`,
-      header: 'Confirmar exclusão',
-      acceptLabel: 'Sim',
-      rejectLabel: 'Cancelar',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => this.remove(product)
-    });
-  }
-
-  private remove(product: Product): void {
-    if (!product.id) return;
-
-    this.productService.delete(product.id).subscribe({
-      next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Removido', detail: 'Produto excluído.' });
-        this.loadProducts();
-      },
-      error: () => {
-        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao excluir.' });
-      }
-    });
+  excluir(): void {
+    if (!this.selecionado || this.selecionado.length === 0) return;
+    this.itens = this.itens.filter((i) => !this.selecionado.includes(i));
+    this.selecionado = [];
   }
 }
 

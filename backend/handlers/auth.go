@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"golang.org/x/crypto/bcrypt"
 
 	"portal-backend/models"
 )
@@ -18,7 +17,7 @@ type AuthHandler struct {
 }
 
 type loginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
+	Login    string `json:"login" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
 
@@ -36,15 +35,17 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	var user models.User
 	err := h.DB.QueryRow(
 		c,
-		`SELECT id::text, COALESCE(name, full_name, '') AS name, email, password_hash, created_at FROM users WHERE email=$1`,
-		payload.Email,
-	).Scan(&user.ID, &user.Name, &user.Email, &user.PasswordHash, &user.CreatedAt)
+		`SELECT id::text, COALESCE(name, '') AS name, login, COALESCE(email, '') AS email, password_plain, created_at
+         FROM users
+         WHERE login=$1`,
+		payload.Login,
+	).Scan(&user.ID, &user.Name, &user.Login, &user.Email, &user.Password, &user.CreatedAt)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Credenciais inválidas"})
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(payload.Password)); err != nil {
+	if user.Password != payload.Password {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Credenciais inválidas"})
 		return
 	}

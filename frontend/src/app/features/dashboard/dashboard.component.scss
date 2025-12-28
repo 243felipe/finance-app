@@ -1,0 +1,232 @@
+@use "sass:color";
+
+$bg: #0d0664;
+$primary: #3418e8;
+$text: #ffffff;
+$surface: #120b80;
+
+.dashboard {
+  display: grid;
+  gap: var(--space-5);
+  color: #0d0664;
+  width: 100%;
+}
+
+.board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+
+  .title {
+    h2 {
+      margin: 0;
+      color: #0d0664;
+    }
+    p {
+      margin: 0.2rem 0 0;
+      color: rgba(13, 6, 100, 0.7);
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(120deg, $primary, color.scale($primary, $lightness: 10%));
+      box-shadow: 0 8px 24px rgba(52, 24, 232, 0.25);
+    }
+  }
+}
+
+.hero-chart {
+  .hero-card {
+    background: #ffffff;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-md);
+    display: grid;
+    gap: 1rem;
+  }
+
+  .hero-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .eyebrow {
+      margin: 0;
+      letter-spacing: 0.08em;
+      color: rgba(13, 6, 100, 0.6);
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+
+    h3 {
+      margin: 0.25rem 0 0;
+      color: #0d0664;
+    }
+  }
+
+  .chart-wrapper {
+    height: 260px;
+  }
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-4);
+  min-width: 0;
+  width: 100%;
+}
+
+.shell.collapsed .cards {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: var(--space-3);
+}
+
+.card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+  width: 100%;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 6px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: linear-gradient(120deg, $primary, color.scale($primary, $lightness: 10%));
+  }
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, $primary, color.scale($primary, $lightness: 8%));
+  display: grid;
+  place-items: center;
+  color: $text;
+  font-size: 1.2rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-body {
+  display: grid;
+  gap: 0.2rem;
+
+  .label {
+    margin: 0;
+    color: rgba(13, 6, 100, 0.68);
+  }
+
+  .value {
+    margin: 0;
+    font-weight: 700;
+    color: #0d0664;
+    font-size: 1.2rem;
+  }
+
+  .change {
+    margin: 0;
+    color: color.scale($primary, $lightness: 8%);
+    font-size: 0.9rem;
+  }
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  color: #0d0664;
+  box-shadow: var(--shadow-xs);
+
+  h3 {
+    margin-top: 0;
+  }
+}
+
+.grid-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.progress-list {
+  display: grid;
+  gap: 0.85rem;
+
+  .progress-item {
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.35rem;
+      color: #0d0664;
+      font-weight: 600;
+    }
+
+    .value {
+      color: rgba(13, 6, 100, 0.7);
+      font-weight: 500;
+    }
+  }
+}
+
+.notifications {
+  .notif {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.65rem;
+    align-items: center;
+    padding: 0.65rem;
+    border-radius: 10px;
+    border: 1px solid var(--neutral-200);
+    margin-bottom: 0.5rem;
+    box-shadow: var(--shadow-xs);
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #3418e8;
+
+    &.warn {
+      background: #f59e0b;
+    }
+    &.error {
+      background: #ef4444;
+    }
+  }
+
+  .title {
+    margin: 0;
+    font-weight: 600;
+    color: #0d0664;
+  }
+
+  .time {
+    margin: 0.1rem 0 0;
+    color: rgba(13, 6, 100, 0.6);
+    font-size: 0.9rem;
+  }
+}

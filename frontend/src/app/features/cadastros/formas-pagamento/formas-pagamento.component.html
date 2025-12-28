@@ -1,0 +1,103 @@
+<section class="card-surface payment-card">
+  <div class="search-bar">
+    <label for="filtro">Descrição</label>
+    <div class="search-row">
+      <input id="filtro" type="text" pInputText [(ngModel)]="filtro" placeholder="Buscar por nome" />
+      <div class="actions">
+        <button pButton type="button" label="Pesquisar" icon="pi pi-search" class="btn-ghost" (click)="pesquisar()"></button>
+        <button pButton type="button" label="Cadastrar" icon="pi pi-plus" class="btn-primary" (click)="abrirModal()"></button>
+        <button
+          pButton
+          type="button"
+          label="Editar"
+          icon="pi pi-pencil"
+          class="btn-primary"
+          (click)="editar()"
+          [disabled]="!selecionado || selecionado.length !== 1"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Excluir"
+          icon="pi pi-trash"
+          class="btn-danger"
+          (click)="excluir()"
+          [disabled]="!selecionado || selecionado.length === 0"
+        ></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <p-table
+      [value]="itensFiltrados"
+      dataKey="id"
+      responsiveLayout="scroll"
+      selectionMode="multiple"
+      [(selection)]="selecionado"
+      [loading]="loading"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 48px"></th>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Tipo</th>
+          <th>Parcelamento</th>
+          <th>Ativa</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-item>
+        <tr [pSelectableRow]="item">
+          <td>
+            <p-tableCheckbox [value]="item"></p-tableCheckbox>
+          </td>
+          <td>{{ item.nome }}</td>
+          <td>{{ item.descricao }}</td>
+          <td>{{ getTipoLabel(item.tipo) }}</td>
+          <td>{{ item.permiteParcelamento ? 'Sim' : 'Não' }}</td>
+          <td>{{ item.ativa ? 'Sim' : 'Não' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>
+
+<p-dialog header="Cadastrar forma de pagamento" [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '560px' }" [closable]="false">
+  <form [formGroup]="form" class="dialog-form">
+    <div class="field">
+      <label for="nome">Nome</label>
+      <input id="nome" type="text" pInputText formControlName="nome" />
+      <small *ngIf="form.get('nome')?.invalid && form.get('nome')?.touched" class="error">Informe o nome.</small>
+    </div>
+
+    <div class="field">
+      <label for="descricao">Descrição</label>
+      <input id="descricao" type="text" pInputText formControlName="descricao" />
+    </div>
+
+    <div class="field">
+      <label for="tipo">Tipo</label>
+      <select id="tipo" formControlName="tipo" class="p-inputtext p-component">
+        <option [ngValue]="null" disabled selected>Selecione</option>
+        <option *ngFor="let t of tipos" [ngValue]="t.value">{{ t.label }}</option>
+      </select>
+      <small *ngIf="form.get('tipo')?.invalid && form.get('tipo')?.touched" class="error">Selecione o tipo.</small>
+    </div>
+
+    <div class="field checkbox-field">
+      <label for="permiteParcelamento">Permite parcelamento</label>
+      <input id="permiteParcelamento" type="checkbox" formControlName="permiteParcelamento" />
+    </div>
+
+    <div class="field checkbox-field">
+      <label for="ativa">Ativa</label>
+      <input id="ativa" type="checkbox" formControlName="ativa" />
+    </div>
+
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="dialogVisible = false"></button>
+      <button pButton type="button" label="Salvar" [loading]="saving" (click)="salvar()" autofocus></button>
+    </div>
+  </form>
+</p-dialog>

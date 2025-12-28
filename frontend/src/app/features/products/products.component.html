@@ -1,87 +1,102 @@
-<p-confirmDialog></p-confirmDialog>
-
 <section class="card-surface products-card">
-  <div class="header">
-    <div>
-      <p class="eyebrow">Produtos</p>
-      <h2>Catálogo do estoque</h2>
-      <p class="muted">Cadastre, edite ou remova produtos.</p>
+  <div class="search-bar">
+    <label for="filtro">Descrição</label>
+    <div class="search-row">
+      <input id="filtro" type="text" pInputText [(ngModel)]="filtroDescricao" placeholder="Buscar por descrição" />
+      <div class="actions">
+        <button pButton type="button" label="Pesquisar" icon="pi pi-search" class="btn-ghost" (click)="pesquisar()"></button>
+        <button pButton type="button" label="Cadastrar" icon="pi pi-plus" class="btn-primary" (click)="abrirModal()"></button>
+        <button
+          pButton
+          type="button"
+          label="Editar"
+          icon="pi pi-pencil"
+          class="btn-primary"
+          (click)="editar()"
+          [disabled]="!selecionado || selecionado.length !== 1"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Excluir"
+          icon="pi pi-trash"
+          class="btn-danger"
+          (click)="excluir()"
+          [disabled]="!selecionado"
+        ></button>
+      </div>
     </div>
-    <button pButton label="Novo produto" icon="pi pi-plus" (click)="openNew()"></button>
   </div>
 
-  <p-table [value]="products" dataKey="id" [loading]="loading" responsiveLayout="scroll">
-    <ng-template pTemplate="header">
-      <tr>
-        <th>Nome</th>
-        <th>SKU</th>
-        <th>Preço</th>
-        <th>Quantidade</th>
-        <th style="width: 140px"></th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-product>
-      <tr>
-        <td>{{ product.name }}</td>
-        <td><span class="sku">{{ product.sku }}</span></td>
-        <td>R$ {{ product.price | number: '1.2-2' }}</td>
-        <td>
-          <p-tag [severity]="product.quantity > 0 ? 'success' : 'danger'" [value]="product.quantity"></p-tag>
-        </td>
-        <td class="actions">
-          <button pButton icon="pi pi-pencil" class="p-button-text" (click)="edit(product)"></button>
-          <button pButton icon="pi pi-trash" class="p-button-text p-button-danger" (click)="confirmDelete(product)"></button>
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
+  <div class="table-scroll">
+    <p-table
+      [value]="itensFiltrados"
+      dataKey="sku"
+      responsiveLayout="scroll"
+      selectionMode="multiple"
+      [(selection)]="selecionado"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 48px"></th>
+          <th>Descrição</th>
+          <th>SKU</th>
+          <th>Categoria</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-item>
+        <tr [pSelectableRow]="item">
+          <td>
+            <p-tableCheckbox [value]="item"></p-tableCheckbox>
+          </td>
+          <td>{{ item.descricao }}</td>
+          <td>{{ item.sku }}</td>
+          <td>{{ item.categoria }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 </section>
 
-<p-dialog
-  header="{{ editingProduct ? 'Editar produto' : 'Novo produto' }}"
-  [(visible)]="dialogVisible"
-  [modal]="true"
-  [style]="{ width: '400px' }"
-  [closable]="false"
->
+<p-dialog header="Cadastrar item" [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '480px' }" [closable]="false">
   <form [formGroup]="form" class="dialog-form">
     <div class="field">
-      <label for="name">Nome</label>
-      <input id="name" type="text" pInputText formControlName="name" />
-      <small *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="error">Informe o nome.</small>
+      <label for="descricao">Descrição</label>
+      <input id="descricao" type="text" pInputText formControlName="descricao" />
+      <small *ngIf="form.get('descricao')?.invalid && form.get('descricao')?.touched" class="error">Informe a descrição.</small>
     </div>
 
     <div class="field">
       <label for="sku">SKU</label>
       <input id="sku" type="text" pInputText formControlName="sku" />
-      <small *ngIf="form.get('sku')?.invalid && form.get('sku')?.touched" class="error">SKU é obrigatório.</small>
+      <small *ngIf="form.get('sku')?.invalid && form.get('sku')?.touched" class="error">Informe o SKU.</small>
     </div>
 
     <div class="field">
-      <label for="price">Preço</label>
-      <p-inputNumber
-        id="price"
-        formControlName="price"
-        mode="currency"
-        currency="BRL"
-        locale="pt-BR"
-        inputId="currency-brl"
-      ></p-inputNumber>
-      <small *ngIf="form.get('price')?.invalid && form.get('price')?.touched" class="error">Preço inválido.</small>
+      <label for="detalhe">Detalhe</label>
+      <input id="detalhe" type="text" pInputText formControlName="detalhe" />
+      <small *ngIf="form.get('detalhe')?.invalid && form.get('detalhe')?.touched" class="error">Informe o detalhe.</small>
     </div>
 
     <div class="field">
-      <label for="quantity">Quantidade</label>
-      <p-inputNumber id="quantity" formControlName="quantity" [min]="0"></p-inputNumber>
-      <small *ngIf="form.get('quantity')?.invalid && form.get('quantity')?.touched" class="error">Quantidade inválida.</small>
+      <label for="categoria">Categoria</label>
+      <select id="categoria" formControlName="categoria" class="p-inputtext p-component">
+        <option [ngValue]="null" disabled selected>Selecione</option>
+        <option *ngFor="let c of categorias" [ngValue]="c.value">{{ c.label }}</option>
+      </select>
+      <small *ngIf="form.get('categoria')?.invalid && form.get('categoria')?.touched" class="error">Selecione uma categoria.</small>
     </div>
 
     <div class="dialog-actions">
       <button pButton type="button" label="Cancelar" class="p-button-text" (click)="dialogVisible = false"></button>
-      <button pButton type="button" label="Salvar" [loading]="saving" (click)="save()" autofocus></button>
+      <button pButton type="button" label="Salvar" [loading]="saving" (click)="salvar()" autofocus></button>
     </div>
   </form>
 </p-dialog>
+
+
+
+
 
 
 
