@@ -168,8 +168,8 @@ $surface: #120b80;
   background: #f1f5f9;
   min-width: 0;
   width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
+  max-width: 100%; // usa toda a largura disponível
+  margin: 0; // remove centralização
   box-sizing: border-box;
 }
 

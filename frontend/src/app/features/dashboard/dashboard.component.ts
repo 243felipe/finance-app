@@ -4,6 +4,7 @@ import { ChartModule } from 'primeng/chart';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
 import { FixedAccountService } from '../../services/fixed-account.service';
+import { AuthService } from '../../core/auth.service';
 
 type StatCard = {
   label: string;
@@ -31,6 +32,7 @@ type Notification = {
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
+  saudacao = '';
   cards: StatCard[] = [
     { label: 'Contas Fixas', value: 'R$ 0,00', change: '', icon: 'pi pi-wallet' },
     { label: 'Status OK', value: '98%', change: '+1,1%', icon: 'pi pi-check-circle' },
@@ -55,10 +57,15 @@ export class DashboardComponent implements OnInit {
   lineOptions: any;
   pieData: any;
   pieOptions: any;
+  barSmallData: any;
+  barSmallOptions: any;
+  doughnutData: any;
+  doughnutOptions: any;
 
-  constructor(private fixedAccountService: FixedAccountService) {}
+  constructor(private fixedAccountService: FixedAccountService, private authService: AuthService) {}
 
   ngOnInit(): void {
+    this.atualizarSaudacao();
     this.carregarTotalContasFixas();
     this.setupCharts();
   }
@@ -145,5 +152,53 @@ export class DashboardComponent implements OnInit {
         legend: { position: 'bottom', labels: { color: textColor } }
       }
     };
+
+    this.barSmallData = {
+      labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+      datasets: [
+        { label: 'Receita', backgroundColor: '#3418e8', data: [32, 44, 58, 66, 68, 80] },
+        { label: 'Despesa', backgroundColor: '#8b5cf6', data: [28, 36, 47, 55, 57, 62] }
+      ]
+    };
+    this.barSmallOptions = {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: textColor } }
+      },
+      scales: {
+        x: { ticks: { color: textColor }, grid: { color: gridColor } },
+        y: { ticks: { color: textColor }, grid: { color: gridColor } }
+      }
+    };
+
+    this.doughnutData = {
+      labels: ['Serviços', 'Produtos', 'Consultoria', 'Outros'],
+      datasets: [
+        {
+          data: [45, 25, 18, 12],
+          backgroundColor: ['#3418e8', '#5f4ae3', '#8974ff', '#b4a7ff'],
+          borderWidth: 1
+        }
+      ]
+    };
+    this.doughnutOptions = {
+      cutout: '60%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: textColor } }
+      }
+    };
+  }
+
+  private atualizarSaudacao(): void {
+    const hora = new Date().getHours();
+    const login = this.authService.getLogin();
+    const nome = login ? login : 'Usuário';
+    if (hora < 12) {
+      this.saudacao = `Bom dia, ${nome}!`;
+    } else if (hora < 18) {
+      this.saudacao = `Boa tarde, ${nome}!`;
+    } else {
+      this.saudacao = `Boa noite, ${nome}!`;
+    }
   }
 }

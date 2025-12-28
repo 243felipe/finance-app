@@ -11,6 +11,7 @@ import { LoginRequest, LoginResponse } from '../models/auth';
 })
 export class AuthService {
   private readonly tokenKey = 'auth_token';
+  private readonly loginKey = 'auth_login';
 
   constructor(private http: HttpClient) {}
 
@@ -19,6 +20,9 @@ export class AuthService {
       tap((res) => {
         if (res?.token) {
           localStorage.setItem(this.tokenKey, res.token);
+          if (payload.login) {
+            localStorage.setItem(this.loginKey, payload.login);
+          }
         }
       })
     );
@@ -26,16 +30,22 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.loginKey);
   }
 
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
 
+  getLogin(): string | null {
+    return localStorage.getItem(this.loginKey);
+  }
+
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
 }
+
 
 
 

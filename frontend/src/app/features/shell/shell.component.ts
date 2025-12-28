@@ -20,7 +20,7 @@ type MenuItem = {
 })
 export class ShellComponent implements AfterViewInit {
   @Input() title = 'Portal';
-  collapsed = false;
+  collapsed = true; // inicia fechado
   expanded: Record<string, boolean> = {};
 
   @ViewChild('mainEl') mainEl?: ElementRef<HTMLDivElement>;

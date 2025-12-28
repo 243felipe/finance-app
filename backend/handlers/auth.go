@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -66,6 +68,17 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		}
 	}
 
+	// Permite credencial de teste local sem afetar prod (habilite com ALLOW_TEST_LOGIN=true)
+	allowTest := strings.EqualFold(os.Getenv("ALLOW_TEST_LOGIN"), "true") || os.Getenv("ALLOW_TEST_LOGIN") == "1"
+	testLogin := os.Getenv("AUTH_TEST_LOGIN")
+	if testLogin == "" {
+		testLogin = "admin"
+	}
+	testPass := os.Getenv("AUTH_TEST_PASSWORD")
+	if testPass == "" {
+		testPass = "admin123"
+	}
+
 	var user models.User
 	err := h.DB.QueryRow(
 		c,
@@ -75,13 +88,24 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		payload.Login,
 	).Scan(&user.ID, &user.Name, &user.Login, &user.Email, &user.Password, &user.CreatedAt)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Credenciais inválidas"})
-		return
-	}
-
-	if user.Password != payload.Password {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Credenciais inválidas"})
-		return
+		if allowTest && payload.Login == testLogin && payload.Password == testPass {
+			user = models.User{
+				ID:        "test",
+				Name:      "Usuário teste",
+				Login:     testLogin,
+				Email:     "",
+				Password:  testPass,
+				CreatedAt: time.Now(),
+			}
+		} else {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Credenciais inválidas"})
+			return
+		}
+	} else {
+		if user.Password != payload.Password {
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "Credenciais inválidas"})
+			return
+		}
 	}
 
 	token, err := h.generateToken(user)
