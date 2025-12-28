@@ -17,8 +17,8 @@ type AuthHandler struct {
 }
 
 type loginRequest struct {
-	Login    string `json:"login" form:"login" binding:"required"`
-	Password string `json:"password" form:"password" binding:"required"`
+	Login    string `json:"login" form:"login"`
+	Password string `json:"password" form:"password"`
 }
 
 type loginResponse struct {
@@ -28,7 +28,8 @@ type loginResponse struct {
 func (h *AuthHandler) Login(c *gin.Context) {
 	var payload loginRequest
 	// Accept both JSON (default Angular) and form-encoded payloads to avoid 400.
-	if err := c.ShouldBind(&payload); err != nil {
+	_ = c.ShouldBind(&payload)
+	if payload.Login == "" || payload.Password == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Payload inválido"})
 		return
 	}
