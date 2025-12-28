@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -43,6 +45,25 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		payload.Password = c.PostForm("password")
 		if payload.Password == "" {
 			payload.Password = c.Query("password")
+		}
+	}
+	// Se ainda estiver vazio, tenta ler o raw body e parsear JSON manualmente
+	if payload.Login == "" || payload.Password == "" {
+		if raw, err := c.GetRawData(); err == nil {
+			log.Printf("login raw body: %s", string(raw))
+			var m map[string]interface{}
+			if err := json.Unmarshal(raw, &m); err == nil {
+				if payload.Login == "" {
+					if v, ok := m["login"].(string); ok {
+						payload.Login = v
+					}
+				}
+				if payload.Password == "" {
+					if v, ok := m["password"].(string); ok {
+						payload.Password = v
+					}
+				}
+			}
 		}
 	}
 
