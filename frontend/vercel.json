@@ -3,16 +3,3 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
-<<<<<<< HEAD
-
-
-
-
-
-=======
-{
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}
->>>>>>> 85370674fbbab89ea019e7746d854735dba0458e
