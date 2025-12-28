@@ -27,9 +27,9 @@ type loginResponse struct {
 
 func (h *AuthHandler) Login(c *gin.Context) {
 	var payload loginRequest
-	// Tenta JSON primeiro; se falhar, tenta form. Não retorna 400 por bind.
-	if err := c.ShouldBindJSON(&payload); err != nil {
-		_ = c.ShouldBind(&payload)
+	// Tenta JSON; se falhar, tenta form, reutilizando o corpo.
+	if err := c.ShouldBindBodyWith(&payload, binding.JSON); err != nil {
+		_ = c.ShouldBindBodyWith(&payload, binding.Form)
 	}
 
 	var user models.User
