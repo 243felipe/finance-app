@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -30,9 +29,9 @@ type loginResponse struct {
 
 func (h *AuthHandler) Login(c *gin.Context) {
 	var payload loginRequest
-	// Tenta JSON; se falhar, tenta form, reutilizando o corpo.
-	if err := c.ShouldBindBodyWith(&payload, binding.JSON); err != nil {
-		_ = c.ShouldBindBodyWith(&payload, binding.Form)
+	// Tenta JSON; se falhar, tenta form/urlencoded padrão.
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		_ = c.ShouldBind(&payload)
 	}
 	// Fallback extra: tenta buscar direto do form/query se ainda vazio
 	if payload.Login == "" {
