@@ -32,6 +32,19 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	if err := c.ShouldBindBodyWith(&payload, binding.JSON); err != nil {
 		_ = c.ShouldBindBodyWith(&payload, binding.Form)
 	}
+	// Fallback extra: tenta buscar direto do form/query se ainda vazio
+	if payload.Login == "" {
+		payload.Login = c.PostForm("login")
+		if payload.Login == "" {
+			payload.Login = c.Query("login")
+		}
+	}
+	if payload.Password == "" {
+		payload.Password = c.PostForm("password")
+		if payload.Password == "" {
+			payload.Password = c.Query("password")
+		}
+	}
 
 	var user models.User
 	err := h.DB.QueryRow(
