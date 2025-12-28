@@ -27,11 +27,9 @@ type loginResponse struct {
 
 func (h *AuthHandler) Login(c *gin.Context) {
 	var payload loginRequest
-	// Accept both JSON (default Angular) and form-encoded payloads to avoid 400.
-	_ = c.ShouldBind(&payload)
-	if payload.Login == "" || payload.Password == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Payload inválido"})
-		return
+	// Tenta JSON primeiro; se falhar, tenta form. Não retorna 400 por bind.
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		_ = c.ShouldBind(&payload)
 	}
 
 	var user models.User
