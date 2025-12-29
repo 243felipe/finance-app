@@ -1,6 +1,6 @@
 <section class="card-surface fontes-card">
   <div class="search-bar">
-    <label for="filtro">Descrição</label>
+    <label for="filtro">Fontes de Renda</label>
     <div class="search-row">
       <input id="filtro" type="text" pInputText [(ngModel)]="filtro" placeholder="Buscar por nome" />
       <div class="actions">
@@ -63,7 +63,7 @@
   </div>
 </section>
 
-<p-dialog header="Cadastrar fonte de renda" [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '560px' }" [closable]="false">
+<p-dialog [header]="editingId ? 'Editar fonte de renda' : 'Cadastrar fonte de renda'" [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '560px' }" [closable]="false">
   <form [formGroup]="form" class="dialog-form">
     <div class="field">
       <label for="nome">Nome</label>

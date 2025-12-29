@@ -12,6 +12,7 @@ $surface: #120b80;
   background: #ffffff;
   overflow-x: hidden;
   --sidebar: 240px;
+  transition: grid-template-columns 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
   &.collapsed {
     grid-template-columns: 72px 1fr;
@@ -24,33 +25,118 @@ $surface: #120b80;
   width: var(--sidebar);
   height: auto;
   min-height: 100vh;
-  padding: 1.5rem 1.25rem;
+  padding: 1rem 1.25rem 1.5rem;
   background: color.scale($bg, $lightness: -2%);
   border-right: 1px solid var(--neutral-200);
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  transition: width 0.2s ease, padding 0.2s ease;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width, padding;
+  overflow: hidden;
 
   &.collapsed {
     width: 72px;
-    padding: 1.25rem 0.75rem;
+    padding: 1.25rem 0.5rem;
+    align-items: center;
 
     .title,
     .menu span,
     .sidebar-footer button span {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .brand {
+      justify-content: center;
+      margin: 0;
+    }
+
+    .menu {
+      align-items: center;
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    .menu a,
+    .menu .parent-row {
+      justify-content: center !important;
+      align-items: center !important;
+      padding: 0.6rem 0 !important;
+      width: 100%;
+      min-width: 0;
+      gap: 0 !important;
+      margin: 0;
+      transition: padding 0.35s cubic-bezier(0.4, 0, 0.2, 1), gap 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .menu a i,
+    .menu .parent-row > i:first-child {
+      font-size: 1.1rem;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      display: block !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      transition: font-size 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+      text-align: center;
+      width: auto;
+    }
+
+    .menu .parent-row {
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    .menu .parent-row .chevron {
+      display: none !important;
+    }
+
+    .menu .parent-row span {
+      display: none !important;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .menu a span {
+      display: none !important;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .menu a.active,
+    .menu .parent-row.active {
+      justify-content: center !important;
+      align-items: center !important;
+      margin: 0;
+      width: 100%;
+      padding: 0.6rem 0 !important;
+    }
+
+    .menu a.active i,
+    .menu .parent-row.active > i:first-child {
+      margin: 0 auto !important;
+      padding: 0 !important;
+      display: block !important;
+    }
+
+    .menu .submenu {
       display: none;
     }
+  }
 
-    .menu a {
-      justify-content: center;
-      padding: 0.6rem 0.35rem;
-    }
-
-    .menu a i {
-      font-size: 1.1rem;
-      margin: 0;
+  &:not(.collapsed) {
+    .title,
+    .menu span,
+    .sidebar-footer button span {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
     }
   }
 }
@@ -60,19 +146,57 @@ $surface: #120b80;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  transition: gap 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: -0.5rem;
 
   .brand-logo {
     max-width: 160px;
     width: 100%;
     height: auto;
     object-fit: contain;
+    transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+}
+
+.sidebar.collapsed .brand {
+  gap: 0;
+
+  .brand-logo {
+    max-width: 48px;
+  }
+}
+
+.sidebar-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  margin: 0;
+  margin-top: -2rem;
+  padding: 0.15rem 0;
+  letter-spacing: 0.02em;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, 
+              visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
+              font-size 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  overflow: hidden;
+  margin-top: -2.5rem;
+}
+
+.sidebar.collapsed .sidebar-title {
+  opacity: 0;
+  visibility: hidden;
+  font-size: 0;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+              font-size 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .menu {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  margin-top: 1rem;
 
   a,
   .parent-row {
@@ -83,7 +207,10 @@ $surface: #120b80;
     border-radius: 12px;
     color: rgba(255, 255, 255, 0.85);
     text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                gap 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover,
     &.active {
@@ -93,6 +220,15 @@ $surface: #120b80;
 
     i {
       font-size: 1rem;
+      transition: font-size 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+    }
+
+    span {
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      overflow: hidden;
     }
   }
 
@@ -100,6 +236,7 @@ $surface: #120b80;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    width: 100%;
 
     .parent-row {
       cursor: default;
@@ -121,9 +258,24 @@ $surface: #120b80;
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
       a {
         padding-left: 2.5rem;
+        transition: padding-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 0.8rem;
+
+        i {
+          font-size: 0.8rem;
+        }
+
+        span {
+          font-size: 0.8rem;
+          white-space: normal;
+          overflow: visible;
+          text-overflow: clip;
+        }
       }
     }
   }
@@ -141,6 +293,7 @@ $surface: #120b80;
   min-width: 0;
   width: 100%;
   box-sizing: border-box;
+  transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .topbar {
@@ -152,15 +305,128 @@ $surface: #120b80;
   color: #0d0664;
   background: #ffffff;
   box-shadow: var(--shadow-xs);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .logout-btn {
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .topbar-title {
   font-weight: 600;
   letter-spacing: 0.01em;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.tabs-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(13, 6, 100, 0.2) transparent;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(13, 6, 100, 0.2);
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(13, 6, 100, 0.3);
+  }
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  color: #0d0664;
+
+  &:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+  }
+
+  &.active {
+    background: #3418e8;
+    border-color: #3418e8;
+    color: #ffffff;
+
+    .tab-icon {
+      color: #ffffff;
+    }
+
+    .tab-close {
+      color: #ffffff;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+
+  .tab-icon {
+    font-size: 0.875rem;
+    color: #0d0664;
+    flex-shrink: 0;
+  }
+
+  .tab-label {
+    font-weight: 500;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tab-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.25rem;
+    color: #64748b;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background: rgba(13, 6, 100, 0.1);
+      color: #0d0664;
+    }
+
+    i {
+      font-size: 0.75rem;
+    }
+  }
 }
 
 .content {

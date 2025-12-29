@@ -1,8 +1,10 @@
 import { CommonModule, NgIf } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
+import { TabsService, Tab } from '../../core/tabs.service';
 
 type MenuItem = {
   label: string;
@@ -18,10 +20,12 @@ type MenuItem = {
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })
-export class ShellComponent implements AfterViewInit {
+export class ShellComponent implements AfterViewInit, OnDestroy {
   @Input() title = 'Portal';
   collapsed = true; // inicia fechado
   expanded: Record<string, boolean> = {};
+  tabs: Tab[] = [];
+  private tabsSubscription?: Subscription;
 
   @ViewChild('mainEl') mainEl?: ElementRef<HTMLDivElement>;
   @ViewChild('contentEl') contentEl?: ElementRef<HTMLElement>;
@@ -55,10 +59,23 @@ export class ShellComponent implements AfterViewInit {
     }
   ];
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private tabsService: TabsService
+  ) {
+    this.tabsSubscription = this.tabsService.tabs$.subscribe((tabs) => {
+      this.tabs = tabs;
+    });
+  }
 
   ngAfterViewInit(): void {
     setTimeout(() => this.logSizes('init'), 0);
+    // Adiciona a aba atual se já houver uma rota ativa
+    const currentRoute = this.router.url;
+    if (currentRoute && currentRoute !== '/login') {
+      this.tabsService.addTab(currentRoute);
+    }
   }
 
   toggle(): void {
@@ -77,6 +94,23 @@ export class ShellComponent implements AfterViewInit {
   logout(): void {
     this.auth.logout();
     this.router.navigate(['/login']);
+  }
+
+  navigateToTab(tab: Tab): void {
+    this.tabsService.navigateToTab(tab);
+  }
+
+  closeTab(tab: Tab, event: Event): void {
+    event.stopPropagation(); // Previne a navegação ao clicar no X
+    this.tabsService.removeTab(tab.id);
+  }
+
+  isActiveTab(tab: Tab): boolean {
+    return this.router.url === tab.route || this.router.url.startsWith(tab.route + '/');
+  }
+
+  ngOnDestroy(): void {
+    this.tabsSubscription?.unsubscribe();
   }
 
   private logSizes(tag: string): void {

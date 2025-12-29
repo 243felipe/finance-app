@@ -8,8 +8,9 @@
   flex-direction: column;
   gap: 1rem;
   height: auto;
-  width: min(1200px, calc(100vw - 32px));
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
 }
 
 .card-surface.payment-card {

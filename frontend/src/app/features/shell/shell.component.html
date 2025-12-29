@@ -4,6 +4,8 @@
       <img src="/images/logo_unica_login.png" alt="Logo" class="brand-logo" />
     </div>
 
+    <h1 class="sidebar-title">Incret Finanças</h1>
+
     <nav class="menu">
       <ng-container *ngFor="let item of menu">
         <div class="menu-parent" *ngIf="item.children?.length; else singleLink">
@@ -38,6 +40,25 @@
     <header class="topbar">
       <button pButton icon="pi pi-bars" class="p-button-text" (click)="toggle()"></button>
       <div class="topbar-title">{{ title }}</div>
+      <div class="tabs-container" *ngIf="tabs.length > 0">
+        <div
+          *ngFor="let tab of tabs"
+          class="tab"
+          [class.active]="isActiveTab(tab)"
+          (click)="navigateToTab(tab)"
+        >
+          <i *ngIf="tab.icon" [class]="tab.icon" class="tab-icon"></i>
+          <span class="tab-label">{{ tab.label }}</span>
+          <button
+            class="tab-close"
+            (click)="closeTab(tab, $event)"
+            type="button"
+            aria-label="Fechar aba"
+          >
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
       <button
         pButton
         label="Sair"
