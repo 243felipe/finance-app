@@ -144,6 +144,13 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
     requestAnimationFrame(() => this.logSizes('toggle'));
   }
 
+  onMenuClick(): void {
+    // Fecha o drawer em mobile após clicar em um item do menu
+    if (window.innerWidth <= 900 && !this.collapsed) {
+      this.collapsed = true;
+    }
+  }
+
   toggleParent(item: MenuItem): void {
     if (this.collapsed || !item.children?.length) return;
     this.expanded[item.label] = !this.expanded[item.label];
@@ -306,6 +313,10 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
 
   navigateToTab(tab: Tab): void {
     this.tabsService.navigateToTab(tab);
+    // Fecha o drawer em mobile após navegação
+    if (window.innerWidth <= 900 && !this.collapsed) {
+      this.collapsed = true;
+    }
   }
 
   closeTab(tab: Tab, event: Event): void {
