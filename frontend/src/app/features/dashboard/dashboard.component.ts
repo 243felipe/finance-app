@@ -191,8 +191,8 @@ export class DashboardComponent implements OnInit {
 
   private atualizarSaudacao(): void {
     const hora = new Date().getHours();
-    const login = this.authService.getLogin();
-    const nome = login ? login : 'Usuário';
+    const name = this.authService.getName();
+    const nome = name ? name : 'Usuário';
     if (hora < 12) {
       this.saudacao = `Bom dia, ${nome}!`;
     } else if (hora < 18) {

@@ -27,6 +27,7 @@ type loginRequest struct {
 
 type loginResponse struct {
 	Token string `json:"token"`
+	Name  string `json:"name"`
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
@@ -114,7 +115,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, loginResponse{Token: token})
+	c.JSON(http.StatusOK, loginResponse{Token: token, Name: user.Name})
 }
 
 func (h *AuthHandler) generateToken(user models.User) (string, error) {

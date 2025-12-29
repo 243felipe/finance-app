@@ -12,6 +12,7 @@ import { LoginRequest, LoginResponse } from '../models/auth';
 export class AuthService {
   private readonly tokenKey = 'auth_token';
   private readonly loginKey = 'auth_login';
+  private readonly nameKey = 'auth_name';
 
   constructor(private http: HttpClient) {}
 
@@ -20,6 +21,10 @@ export class AuthService {
       tap((res) => {
         if (res?.token) {
           localStorage.setItem(this.tokenKey, res.token);
+          if (res?.name) {
+            localStorage.setItem(this.nameKey, res.name);
+          }
+          // Mantém loginKey para compatibilidade, mas prioriza name
           if (payload.login) {
             localStorage.setItem(this.loginKey, payload.login);
           }
@@ -31,6 +36,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.loginKey);
+    localStorage.removeItem(this.nameKey);
   }
 
   getToken(): string | null {
@@ -39,6 +45,10 @@ export class AuthService {
 
   getLogin(): string | null {
     return localStorage.getItem(this.loginKey);
+  }
+
+  getName(): string | null {
+    return localStorage.getItem(this.nameKey);
   }
 
   isAuthenticated(): boolean {
