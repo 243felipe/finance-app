@@ -1,9 +1,9 @@
 export const environment = {
   production: true,
-  URL_FR_BE: `https://${window.location.hostname}:9000/api`,
-  url: `https://${window.location.hostname}:9000`,
-  urlProduction: `https://${window.location.hostname}:9000/api`,
-  apiUrl: `https://${window.location.hostname}:9000/api`,
+  URL_FR_BE: 'https://finance-app-5ltv.onrender.com/api',
+  url: 'https://finance-app-5ltv.onrender.com',
+  urlProduction: 'https://finance-app-5ltv.onrender.com/api',
+  apiUrl: 'https://finance-app-5ltv.onrender.com/api',
   tokenDev: null
 };
 
