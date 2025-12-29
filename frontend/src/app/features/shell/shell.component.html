@@ -45,11 +45,13 @@
           *ngFor="let tab of tabs"
           class="tab"
           [class.active]="isActiveTab(tab)"
+          [class.dashboard-tab]="tab.route === '/dashboard'"
           (click)="navigateToTab(tab)"
         >
           <i *ngIf="tab.icon" [class]="tab.icon" class="tab-icon"></i>
           <span class="tab-label">{{ tab.label }}</span>
           <button
+            *ngIf="tab.route !== '/dashboard'"
             class="tab-close"
             (click)="closeTab(tab, $event)"
             type="button"
@@ -59,18 +61,134 @@
           </button>
         </div>
       </div>
-      <button
-        pButton
-        label="Sair"
-        icon="pi pi-sign-out"
-        severity="success"
-        class="p-button-text logout-btn"
-        (click)="logout()"
-      ></button>
+      <div class="user-menu-container" #userMenuContainer>
+        <button
+          pButton
+          icon="pi pi-user"
+          class="p-button-text user-btn"
+          #userBtn
+          (click)="toggleUserMenu()"
+          [class.active]="userMenuOpen"
+        ></button>
+        <div
+          class="user-menu-dropdown"
+          *ngIf="userMenuOpen"
+          [style.top.px]="dropdownPosition.top"
+          [style.right.px]="dropdownPosition.right"
+        >
+          <button class="dropdown-item" (click)="openProfileModal()">
+            <i class="pi pi-user"></i>
+            <span>Perfil</span>
+          </button>
+          <button class="dropdown-item" (click)="openLogoutConfirmModal()">
+            <i class="pi pi-sign-out"></i>
+            <span>Sair</span>
+          </button>
+        </div>
+      </div>
     </header>
 
     <main class="content" #contentEl>
       <router-outlet />
     </main>
   </div>
+
+  <!-- Modal de Perfil -->
+  <p-dialog
+    [(visible)]="profileModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '520px' }"
+    header="Perfil"
+    (onHide)="closeProfileModal()"
+  >
+    <div class="profile-content">
+      <div class="profile-field">
+        <label>Nome</label>
+        <div class="field-row">
+          <input
+            pInputText
+            [(ngModel)]="profileName"
+            [disabled]="!editingName"
+            placeholder="Nome"
+            class="field-input"
+          />
+          <button
+            pButton
+            [label]="editingName ? 'Salvar' : 'Editar'"
+            [icon]="editingName ? 'pi pi-check' : 'pi pi-pencil'"
+            [class]="editingName ? 'p-button-success' : 'p-button-secondary'"
+            (click)="toggleEditName()"
+            [loading]="savingName"
+          ></button>
+        </div>
+      </div>
+
+      <div class="profile-field">
+        <label>Login</label>
+        <div class="field-row">
+          <input
+            pInputText
+            [(ngModel)]="profileLogin"
+            [disabled]="!editingLogin"
+            placeholder="Login"
+            class="field-input"
+          />
+          <button
+            pButton
+            [label]="editingLogin ? 'Salvar' : 'Editar'"
+            [icon]="editingLogin ? 'pi pi-check' : 'pi pi-pencil'"
+            [class]="editingLogin ? 'p-button-success' : 'p-button-secondary'"
+            (click)="toggleEditLogin()"
+            [loading]="savingLogin"
+          ></button>
+        </div>
+      </div>
+
+      <div class="profile-field">
+        <label>Senha</label>
+        <div class="field-row">
+          <input
+            pInputText
+            type="password"
+            [(ngModel)]="profilePassword"
+            [disabled]="!editingPassword"
+            placeholder="Nova senha"
+            class="field-input"
+          />
+          <button
+            pButton
+            [label]="editingPassword ? 'Salvar' : 'Editar'"
+            [icon]="editingPassword ? 'pi pi-check' : 'pi pi-pencil'"
+            [class]="editingPassword ? 'p-button-success' : 'p-button-secondary'"
+            (click)="toggleEditPassword()"
+            [loading]="savingPassword"
+          ></button>
+        </div>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="profile-actions">
+        <button pButton type="button" label="Cancelar" class="p-button-text" (click)="closeProfileModal()"></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Modal de Confirmação de Saída -->
+  <p-dialog
+    [(visible)]="logoutConfirmModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '400px' }"
+    header="Confirmar Saída"
+    (onHide)="closeLogoutConfirmModal()"
+  >
+    <div class="logout-confirm-content">
+      <p>Deseja realmente sair?</p>
+      <div class="logout-buttons">
+        <button pButton label="Não" class="p-button-secondary" (click)="closeLogoutConfirmModal()"></button>
+        <button pButton label="Sim" class="p-button-danger" (click)="confirmLogout()"></button>
+      </div>
+    </div>
+  </p-dialog>
 </div>

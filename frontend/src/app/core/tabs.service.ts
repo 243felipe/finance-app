@@ -47,6 +47,9 @@ export class TabsService {
   };
 
   constructor(private router: Router) {
+    // Adiciona o Dashboard como primeira aba sempre
+    this.ensureDashboardTab();
+    
     // Observa mudanças de rota e adiciona abas automaticamente
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
@@ -54,8 +57,32 @@ export class TabsService {
         const url = (event as NavigationEnd).urlAfterRedirects;
         if (url && url !== '/login') {
           this.addTab(url);
+          // Garante que o Dashboard sempre esteja presente
+          this.ensureDashboardTab();
         }
       });
+  }
+
+  private ensureDashboardTab(): void {
+    const currentTabs = this.tabsSubject.value;
+    const dashboardTab: Tab = {
+      id: '/dashboard',
+      label: 'Dashboard',
+      route: '/dashboard',
+      icon: 'pi pi-home'
+    };
+
+    // Verifica se o Dashboard já existe
+    const dashboardExists = currentTabs.some((tab) => tab.id === '/dashboard');
+
+    if (!dashboardExists) {
+      // Adiciona o Dashboard como primeira aba
+      this.tabsSubject.next([dashboardTab, ...currentTabs]);
+    } else {
+      // Garante que o Dashboard seja sempre a primeira aba
+      const otherTabs = currentTabs.filter((tab) => tab.id !== '/dashboard');
+      this.tabsSubject.next([dashboardTab, ...otherTabs]);
+    }
   }
 
   getTabs(): Tab[] {
@@ -63,6 +90,12 @@ export class TabsService {
   }
 
   addTab(route: string): void {
+    // Não adiciona o Dashboard novamente, ele já é gerenciado pelo ensureDashboardTab
+    if (route === '/dashboard') {
+      this.ensureDashboardTab();
+      return;
+    }
+
     const currentTabs = this.tabsSubject.value;
     const tabId = route;
 
@@ -81,23 +114,31 @@ export class TabsService {
       icon
     };
 
-    this.tabsSubject.next([...currentTabs, newTab]);
+    // Adiciona a nova aba, mas mantém o Dashboard como primeira
+    const dashboardTab = currentTabs.find((tab) => tab.id === '/dashboard');
+    const otherTabs = currentTabs.filter((tab) => tab.id !== '/dashboard');
+    
+    if (dashboardTab) {
+      this.tabsSubject.next([dashboardTab, ...otherTabs, newTab]);
+    } else {
+      this.tabsSubject.next([...currentTabs, newTab]);
+    }
   }
 
   removeTab(tabId: string): void {
+    // Não permite remover o Dashboard
+    if (tabId === '/dashboard') {
+      return;
+    }
+
     const currentTabs = this.tabsSubject.value;
     const filteredTabs = currentTabs.filter((tab) => tab.id !== tabId);
     this.tabsSubject.next(filteredTabs);
 
-    // Se a aba removida era a ativa, navega para a última aba ou dashboard
+    // Se a aba removida era a ativa, navega para o Dashboard
     const currentRoute = this.router.url;
     if (currentRoute === tabId) {
-      if (filteredTabs.length > 0) {
-        const lastTab = filteredTabs[filteredTabs.length - 1];
-        this.router.navigate([lastTab.route]);
-      } else {
-        this.router.navigate(['/dashboard']);
-      }
+      this.router.navigate(['/dashboard']);
     }
   }
 

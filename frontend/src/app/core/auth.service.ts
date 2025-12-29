@@ -4,7 +4,7 @@ import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../environments/environment';
-import { LoginRequest, LoginResponse } from '../models/auth';
+import { LoginRequest, LoginResponse, ProfileResponse, UpdateProfileRequest } from '../models/auth';
 
 @Injectable({
   providedIn: 'root'
@@ -53,6 +53,32 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return !!this.getToken();
+  }
+
+  getProfile(): Observable<ProfileResponse> {
+    return this.http.get<ProfileResponse>(`${environment.apiUrl}/auth/profile`).pipe(
+      tap((profile) => {
+        if (profile?.name) {
+          localStorage.setItem(this.nameKey, profile.name);
+        }
+        if (profile?.login) {
+          localStorage.setItem(this.loginKey, profile.login);
+        }
+      })
+    );
+  }
+
+  updateProfile(payload: UpdateProfileRequest): Observable<ProfileResponse> {
+    return this.http.put<ProfileResponse>(`${environment.apiUrl}/auth/profile`, payload).pipe(
+      tap((profile) => {
+        if (profile?.name) {
+          localStorage.setItem(this.nameKey, profile.name);
+        }
+        if (profile?.login) {
+          localStorage.setItem(this.loginKey, profile.login);
+        }
+      })
+    );
   }
 }
 

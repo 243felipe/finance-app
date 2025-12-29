@@ -54,6 +54,9 @@ func main() {
 		secured := api.Group("/")
 		secured.Use(middleware.Auth(cfg.JWTSecret))
 		{
+			secured.GET("/auth/profile", authHandler.GetProfile)
+			secured.PUT("/auth/profile", authHandler.UpdateProfile)
+
 			secured.GET("/products", productHandler.List)
 			secured.GET("/products/:id", productHandler.Get)
 			secured.POST("/products", productHandler.Create)
