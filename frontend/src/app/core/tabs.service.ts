@@ -28,7 +28,9 @@ export class TabsService {
     '/lancamentos/despesa/despesas-extras': 'Despesa - Extras',
     '/lancamentos/pagamento-conta-fixa': 'Pagamento Conta Fixa',
     '/lancamentos/recorrentes/entradas': 'Recorrentes - Entradas',
-    '/lancamentos/recorrentes/saidas': 'Recorrentes - Saídas'
+    '/lancamentos/recorrentes/saidas': 'Recorrentes - Saídas',
+    '/mercado/lancamento': 'Lançamento - Mercado',
+    '/mercado/anotacoes': 'Anotações - Mercado'
   };
 
   private routeIcons: Record<string, string> = {
@@ -43,7 +45,9 @@ export class TabsService {
     '/lancamentos/despesa/despesas-extras': 'pi pi-book',
     '/lancamentos/pagamento-conta-fixa': 'pi pi-credit-card',
     '/lancamentos/recorrentes/entradas': 'pi pi-refresh',
-    '/lancamentos/recorrentes/saidas': 'pi pi-refresh'
+    '/lancamentos/recorrentes/saidas': 'pi pi-refresh',
+    '/mercado/lancamento': 'pi pi-dollar',
+    '/mercado/anotacoes': 'pi pi-list'
   };
 
   constructor(private router: Router) {

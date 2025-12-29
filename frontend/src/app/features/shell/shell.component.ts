@@ -8,6 +8,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
 import { TabsService, Tab } from '../../core/tabs.service';
+import { SessionTimeoutService } from '../../core/session-timeout.service';
 
 type MenuItem = {
   label: string;
@@ -61,6 +62,10 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
   // Logout confirm modal
   logoutConfirmModalVisible = false;
 
+  // Session timeout modal
+  sessionTimeoutWarningVisible = false;
+  private sessionTimeoutSubscription?: Subscription;
+
   @ViewChild('mainEl') mainEl?: ElementRef<HTMLDivElement>;
   @ViewChild('contentEl') contentEl?: ElementRef<HTMLElement>;
 
@@ -90,16 +95,31 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
         { label: 'Recorrentes - Entradas', icon: 'pi pi-refresh', route: '/lancamentos/recorrentes/entradas' },
         { label: 'Recorrentes - Saídas', icon: 'pi pi-refresh', route: '/lancamentos/recorrentes/saidas' }
       ]
+    },
+    {
+      label: 'Mercado',
+      icon: 'pi pi-shopping-cart',
+      route: '',
+      children: [
+        { label: 'Lançamento - Mercado', icon: 'pi pi-dollar', route: '/mercado/lancamento' },
+        { label: 'Anotações - Mercado', icon: 'pi pi-list', route: '/mercado/anotacoes' }
+      ]
     }
   ];
 
   constructor(
     private auth: AuthService,
     private router: Router,
-    private tabsService: TabsService
+    private tabsService: TabsService,
+    private sessionTimeoutService: SessionTimeoutService
   ) {
     this.tabsSubscription = this.tabsService.tabs$.subscribe((tabs) => {
       this.tabs = tabs;
+    });
+
+    // Observa o aviso de timeout de sessão
+    this.sessionTimeoutSubscription = this.sessionTimeoutService.showWarning$.subscribe((showWarning) => {
+      this.sessionTimeoutWarningVisible = showWarning;
     });
   }
 
@@ -112,6 +132,8 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
     if (currentRoute && currentRoute !== '/login' && currentRoute !== '/dashboard') {
       this.tabsService.addTab(currentRoute);
     }
+    // Inicializa o monitoramento de timeout de sessão
+    this.sessionTimeoutService.initialize();
   }
 
   toggle(): void {
@@ -297,6 +319,18 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.tabsSubscription?.unsubscribe();
+    this.sessionTimeoutSubscription?.unsubscribe();
+  }
+
+  // Session timeout methods
+  extendSession(): void {
+    this.sessionTimeoutService.extendSession();
+    this.sessionTimeoutWarningVisible = false;
+  }
+
+  handleSessionTimeout(): void {
+    this.sessionTimeoutService.logout();
+    this.sessionTimeoutWarningVisible = false;
   }
 
   private logSizes(tag: string): void {

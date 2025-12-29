@@ -1,0 +1,204 @@
+<div class="anotacoes-container">
+  <div class="header-section">
+    <div class="title-section">
+      <h1>
+        <i class="pi pi-shopping-cart"></i>
+        Lista de Compras
+      </h1>
+      <p class="subtitle">Organize suas compras do mercado</p>
+    </div>
+    <div class="stats-section" *ngIf="listaSelecionada">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="pi pi-list"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ totalItens }}</span>
+          <span class="stat-label">Itens</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon completed">
+          <i class="pi pi-check"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ itensCompletados }}</span>
+          <span class="stat-label">Completos</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon total">
+          <i class="pi pi-wallet"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">R$ {{ formatCurrency(valorTotal) }}</span>
+          <span class="stat-label">Total</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seção de Listas -->
+  <div class="listas-section">
+    <div class="section-header">
+      <h2>Minhas Listas</h2>
+      <button pButton type="button" label="Nova Lista" icon="pi pi-plus" class="btn-add" (click)="abrirModalLista()"></button>
+    </div>
+    <div class="listas-grid" *ngIf="!loading && listas.length > 0">
+      <div
+        class="lista-card"
+        *ngFor="let lista of listas"
+        [class.active]="listaSelecionadaId === lista.id"
+        (click)="carregarItens(lista.id)"
+      >
+        <div class="lista-header">
+          <h3>{{ lista.nome }}</h3>
+          <div class="lista-actions" (click)="$event.stopPropagation()">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-pencil"
+              class="p-button-text p-button-sm"
+              (click)="editarLista(lista)"
+              [title]="'Editar ' + lista.nome"
+            ></button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-trash"
+              class="p-button-text p-button-sm p-button-danger"
+              (click)="excluirLista(lista)"
+              [title]="'Excluir ' + lista.nome"
+            ></button>
+          </div>
+        </div>
+        <div class="lista-meta">
+          <span class="lista-data">{{ lista.data | date: 'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="empty-state" *ngIf="!loading && listas.length === 0">
+      <i class="pi pi-list empty-icon"></i>
+      <h3>Nenhuma lista criada</h3>
+      <p>Comece criando sua primeira lista de compras</p>
+      <button pButton type="button" label="Criar Primeira Lista" icon="pi pi-plus" class="btn-add" (click)="abrirModalLista()"></button>
+    </div>
+  </div>
+
+  <!-- Seção de Itens -->
+  <div class="itens-section" *ngIf="listaSelecionada">
+    <div class="section-header">
+      <h2>Itens - {{ listaSelecionada.nome }}</h2>
+      <button pButton type="button" label="Adicionar Item" icon="pi pi-plus" class="btn-add" (click)="abrirModalItem()"></button>
+    </div>
+
+    <div class="lista-container" *ngIf="!loading && itens.length > 0">
+      <div
+        class="item-card"
+        *ngFor="let item of itens"
+        [class.completo]="isCompleto(item)"
+      >
+        <div class="item-checkbox" (click)="toggleCompleto(item)">
+          <i class="pi" [class.pi-check-circle]="isCompleto(item)" [class.pi-circle]="!isCompleto(item)"></i>
+        </div>
+        <div class="item-content">
+          <div class="item-descricao">{{ item.descricao }}</div>
+          <div class="item-meta">
+            <span class="item-valor" *ngIf="item.valor > 0">R$ {{ formatCurrency(item.valor) }}</span>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button
+            pButton
+            type="button"
+            icon="pi pi-pencil"
+            class="p-button-text p-button-sm"
+            (click)="editarItem(item)"
+            [title]="'Editar ' + item.descricao"
+          ></button>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-trash"
+            class="p-button-text p-button-sm p-button-danger"
+            (click)="excluirItem(item)"
+            [title]="'Excluir ' + item.descricao"
+          ></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && itens.length === 0">
+      <i class="pi pi-shopping-bag empty-icon"></i>
+      <h3>Nenhum item nesta lista</h3>
+      <p>Comece adicionando itens à sua lista de compras</p>
+      <button pButton type="button" label="Adicionar Primeiro Item" icon="pi pi-plus" class="btn-add" (click)="abrirModalItem()"></button>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <i class="pi pi-spin pi-spinner"></i>
+    <p>Carregando...</p>
+  </div>
+</div>
+
+<!-- Modal de Lista -->
+<p-dialog
+  [header]="editingListaId ? 'Editar Lista' : 'Nova Lista'"
+  [(visible)]="listaDialogVisible"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [closable]="false"
+>
+  <form [formGroup]="listaForm" class="dialog-form">
+    <div class="field">
+      <label for="nome">Nome da Lista</label>
+      <input id="nome" type="text" pInputText formControlName="nome" placeholder="Ex: Compras do Mês" />
+      <small *ngIf="listaForm.get('nome')?.invalid && listaForm.get('nome')?.touched" class="error">
+        Informe o nome da lista.
+      </small>
+    </div>
+
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="listaDialogVisible = false"></button>
+      <button pButton type="button" label="Salvar" [loading]="saving" (click)="salvarLista()" autofocus></button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Modal de Item -->
+<p-dialog
+  [header]="editingItemId ? 'Editar Item' : 'Adicionar Item'"
+  [(visible)]="itemDialogVisible"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [closable]="false"
+>
+  <form [formGroup]="itemForm" class="dialog-form">
+    <div class="field">
+      <label for="descricao">O que precisa comprar?</label>
+      <input id="descricao" type="text" pInputText formControlName="descricao" placeholder="Ex: Leite, Pão, Arroz..." />
+      <small *ngIf="itemForm.get('descricao')?.invalid && itemForm.get('descricao')?.touched" class="error">
+        Informe o que precisa comprar.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="valor">Valor estimado (opcional)</label>
+      <input
+        id="valor"
+        type="number"
+        step="0.01"
+        min="0"
+        pInputText
+        formControlName="valor"
+        placeholder="0,00"
+      />
+    </div>
+
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="itemDialogVisible = false"></button>
+      <button pButton type="button" label="Salvar" [loading]="saving" (click)="salvarItem()" autofocus></button>
+    </div>
+  </form>
+</p-dialog>

@@ -191,4 +191,26 @@
       </div>
     </div>
   </p-dialog>
+
+  <!-- Modal de Aviso de Timeout de Sessão -->
+  <p-dialog
+    [(visible)]="sessionTimeoutWarningVisible"
+    [modal]="true"
+    [closable]="false"
+    [style]="{ width: '500px' }"
+    header="Sessão Expirada"
+  >
+    <div class="session-timeout-content">
+      <div class="warning-message">
+        <i class="pi pi-exclamation-triangle warning-icon"></i>
+        <div class="message-text">
+          <p><strong>Você ficou inativo por 45 minutos.</strong></p>
+          <p>Por motivos de segurança, sua sessão será encerrada automaticamente em breve.</p>
+        </div>
+      </div>
+      <div class="session-timeout-buttons">
+        <button pButton label="Continuar" class="p-button-primary" (click)="extendSession()"></button>
+      </div>
+    </div>
+  </p-dialog>
 </div>

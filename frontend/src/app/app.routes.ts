@@ -84,6 +84,16 @@ export const routes: Routes = [
           import('./features/shared/placeholder-page.component').then((c) => c.PlaceholderPageComponent),
         data: { title: 'Lançamentos Recorrentes - Saídas' }
       },
+      {
+        path: 'mercado/lancamento',
+        loadComponent: () =>
+          import('./features/mercado/lancamento-mercado/lancamento-mercado.component').then((c) => c.LancamentoMercadoComponent)
+      },
+      {
+        path: 'mercado/anotacoes',
+        loadComponent: () =>
+          import('./features/mercado/anotacoes-mercado/anotacoes-mercado.component').then((c) => c.AnotacoesMercadoComponent)
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' }
     ]
   },

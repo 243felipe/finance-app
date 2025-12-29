@@ -1,0 +1,146 @@
+<section class="card-surface categories-card">
+  <div class="search-bar">
+    <label for="filtro">Lançamento - Mercado</label>
+    <div class="search-row">
+      <select
+        id="listaSelect"
+        [(ngModel)]="listaSelecionadaId"
+        (ngModelChange)="carregarItens()"
+        class="p-inputtext p-component"
+        style="min-width: 200px;"
+      >
+        <option [ngValue]="null">Selecione uma lista</option>
+        <option *ngFor="let lista of listas" [ngValue]="lista.id">{{ lista.nome }}</option>
+      </select>
+      <input
+        id="filtro"
+        type="text"
+        pInputText
+        [(ngModel)]="filtro"
+        placeholder="Buscar por descrição"
+        [disabled]="!listaSelecionadaId"
+      />
+      <div class="actions">
+        <button pButton type="button" label="Pesquisar" icon="pi pi-search" class="btn-ghost" (click)="pesquisar()" [disabled]="!listaSelecionadaId"></button>
+        <button pButton type="button" label="Cadastrar" icon="pi pi-plus" class="btn-primary" (click)="abrirModal()" [disabled]="!listaSelecionadaId"></button>
+        <button
+          pButton
+          type="button"
+          label="Editar"
+          icon="pi pi-pencil"
+          class="btn-primary"
+          (click)="editar()"
+          [disabled]="!selecionado || selecionado.length !== 1"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Excluir"
+          icon="pi pi-trash"
+          class="btn-danger"
+          (click)="excluir()"
+          [disabled]="!selecionado || selecionado.length === 0"
+        ></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-scroll" *ngIf="listaSelecionadaId">
+    <p-table
+      [value]="itensFiltrados"
+      dataKey="id"
+      responsiveLayout="scroll"
+      selectionMode="multiple"
+      [(selection)]="selecionado"
+      [loading]="loading"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 48px"></th>
+          <th>Descrição</th>
+          <th>Valor</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-item>
+        <tr [pSelectableRow]="item">
+          <td>
+            <p-tableCheckbox [value]="item"></p-tableCheckbox>
+          </td>
+          <td>{{ item.descricao }}</td>
+          <td>R$ {{ formatCurrency(item.valor) }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <div class="empty-state" *ngIf="!listaSelecionadaId && !loading">
+    <p>Selecione uma lista de compras para ver os lançamentos</p>
+  </div>
+</section>
+
+<p-dialog
+  [header]="editingId ? 'Editar Lançamento' : 'Cadastrar Lançamento'"
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{ width: '520px' }"
+  [closable]="false"
+>
+  <form [formGroup]="form" class="dialog-form">
+    <div class="field" *ngIf="!editingId">
+      <label for="listaComprasId">Lista de Compras</label>
+      <select id="listaComprasId" formControlName="listaComprasId" class="p-inputtext p-component">
+        <option [ngValue]="null" disabled selected>Selecione</option>
+        <option *ngFor="let lista of listas" [ngValue]="lista.id">{{ lista.nome }}</option>
+      </select>
+      <small *ngIf="form.get('listaComprasId')?.invalid && form.get('listaComprasId')?.touched" class="error">
+        Selecione uma lista.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="descricao">Descrição</label>
+      <input id="descricao" type="text" pInputText formControlName="descricao" />
+      <small *ngIf="form.get('descricao')?.invalid && form.get('descricao')?.touched" class="error">
+        Informe a descrição.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="valor">Valor</label>
+      <input
+        id="valor"
+        type="number"
+        step="0.01"
+        min="0.01"
+        pInputText
+        formControlName="valor"
+        placeholder="0,00"
+      />
+      <small *ngIf="form.get('valor')?.invalid && form.get('valor')?.touched" class="error">
+        Informe o valor.
+      </small>
+    </div>
+
+    <div class="field">
+      <label for="idCategoria">Categoria Financeira (opcional)</label>
+      <select id="idCategoria" formControlName="idCategoria" class="p-inputtext p-component">
+        <option [ngValue]="null" selected>Selecione</option>
+        <option *ngFor="let c of categorias" [ngValue]="c.id">{{ c.nome }}</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="idFormaPagamento">Forma de Pagamento (opcional)</label>
+      <select id="idFormaPagamento" formControlName="idFormaPagamento" class="p-inputtext p-component">
+        <option [ngValue]="null" selected>Selecione</option>
+        <option *ngFor="let fp of formasPagamento" [ngValue]="fp.id">{{ fp.nome }}</option>
+      </select>
+    </div>
+
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="dialogVisible = false"></button>
+      <button pButton type="button" label="Salvar" [loading]="saving" (click)="salvar()" autofocus></button>
+    </div>
+  </form>
+</p-dialog>
+
