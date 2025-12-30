@@ -93,6 +93,7 @@ func main() {
 			secured.DELETE("/formas-pagamento/:id", formaPagamentoHandler.Delete)
 
 			secured.GET("/lancamentos", lancamentoHandler.List)
+			secured.GET("/lancamentos/filtro", lancamentoHandler.ListByDateRange)
 			secured.GET("/lancamentos/:id", lancamentoHandler.Get)
 			secured.POST("/lancamentos", lancamentoHandler.Create)
 			secured.PUT("/lancamentos/:id", lancamentoHandler.Update)

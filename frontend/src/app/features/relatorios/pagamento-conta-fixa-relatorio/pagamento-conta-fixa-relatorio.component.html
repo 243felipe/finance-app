@@ -1,0 +1,104 @@
+<section class="card-surface relatorio-card">
+  <div class="search-bar">
+    <h2 class="relatorio-title">Relatório de Pagamento de Conta Fixa</h2>
+    <div class="filtros-container">
+      <div class="filtros-row">
+        <div class="filtro-item">
+          <label for="dataInicio">
+            <i class="pi pi-calendar"></i>
+            Data Início
+          </label>
+          <p-datepicker
+            id="dataInicio"
+            [(ngModel)]="dataInicio"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            [showButtonBar]="true"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          ></p-datepicker>
+        </div>
+        <div class="filtro-item">
+          <label for="dataFim">
+            <i class="pi pi-calendar"></i>
+            Data Fim
+          </label>
+          <p-datepicker
+            id="dataFim"
+            [(ngModel)]="dataFim"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            [showButtonBar]="true"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+          ></p-datepicker>
+        </div>
+        <div class="filtro-actions">
+          <button
+            pButton
+            type="button"
+            label="Pesquisar"
+            icon="pi pi-search"
+            class="p-button-primary"
+            (click)="pesquisar()"
+            [loading]="loading"
+          ></button>
+          <button
+            pButton
+            type="button"
+            label="Visualizar PDF"
+            icon="pi pi-eye"
+            class="p-button-primary"
+            (click)="visualizarPdf()"
+            [disabled]="dados.length === 0"
+          ></button>
+          <button
+            pButton
+            type="button"
+            label="Imprimir PDF"
+            icon="pi pi-file-pdf"
+            class="p-button-primary p-button-outlined"
+            (click)="gerarPdf()"
+            [disabled]="dados.length === 0"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-scroll" *ngIf="!loading && dados.length > 0">
+    <p-table [value]="dados" [loading]="loading" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Data</th>
+          <th>Descrição</th>
+          <th>Conta Fixa</th>
+          <th>Categoria</th>
+          <th>Forma de Pagamento</th>
+          <th class="text-right">Valor</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-item>
+        <tr>
+          <td>{{ formatarData(item.dataLancamento) }}</td>
+          <td>{{ item.descricao }}</td>
+          <td>{{ item.contaFixa || '-' }}</td>
+          <td>{{ item.categoria || '-' }}</td>
+          <td>{{ item.formaPagamento || '-' }}</td>
+          <td class="text-right">{{ formatarMoeda(item.valor) }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="footer">
+        <tr>
+          <td colspan="5" class="text-right font-bold">Total:</td>
+          <td class="text-right font-bold">{{ formatarMoeda(total) }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <div class="no-data" *ngIf="!loading && dados.length === 0">
+    <p>Nenhum registro encontrado no período selecionado.</p>
+  </div>
+</section>
+

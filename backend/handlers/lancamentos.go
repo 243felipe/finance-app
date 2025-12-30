@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -51,6 +52,111 @@ func (h *LancamentoHandler) List(c *gin.Context) {
 		LEFT JOIN conta_fixa cf ON cf.id_conta_fixa = lf.id_conta_fixa
 		LEFT JOIN forma_pagamento fp ON fp.id_forma_pagamento = lf.id_forma_pagamento
 		ORDER BY lf.data_lancamento DESC, lf.id_lancamento DESC`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao listar lançamentos"})
+		return
+	}
+	defer rows.Close()
+
+	var items []models.LancamentoFinanceiro
+	for rows.Next() {
+		var lf models.LancamentoFinanceiro
+		if err := rows.Scan(
+			&lf.ID,
+			&lf.DataLancamento,
+			&lf.Descricao,
+			&lf.Tipo,
+			&lf.Valor,
+			&lf.IDCategoria,
+			&lf.IDFonteRenda,
+			&lf.IDContaFixa,
+			&lf.IDFormaPagamento,
+			&lf.Observacao,
+			&lf.CriadoEm,
+			&lf.AtualizadoEm,
+			&lf.CategoriaNome,
+			&lf.FonteRendaNome,
+			&lf.ContaFixaNome,
+			&lf.FormaPagamentoNome,
+		); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao ler lançamento"})
+			return
+		}
+		items = append(items, lf)
+	}
+
+	c.JSON(http.StatusOK, items)
+}
+
+// ListByDateRange retorna lançamentos filtrados por período e tipo
+func (h *LancamentoHandler) ListByDateRange(c *gin.Context) {
+	dataInicio := c.Query("dataInicio")
+	dataFim := c.Query("dataFim")
+	tipo := c.Query("tipo")
+	idContaFixa := c.Query("idContaFixa")
+	idFonteRenda := c.Query("idFonteRenda")
+
+	query := `
+		SELECT 
+			lf.id_lancamento,
+			lf.data_lancamento,
+			lf.descricao,
+			lf.tipo,
+			lf.valor,
+			lf.id_categoria,
+			lf.id_fonte_renda,
+			lf.id_conta_fixa,
+			lf.id_forma_pagamento,
+			COALESCE(lf.observacao, '') AS observacao,
+			lf.criado_em,
+			lf.atualizado_em,
+			c.nome AS categoria,
+			COALESCE(fr.nome, '') AS fonte_renda,
+			COALESCE(cf.nome, '') AS conta_fixa,
+			COALESCE(fp.nome, '') AS forma_pagamento
+		FROM lancamento_financeiro lf
+		JOIN categoria_financeira c ON c.id_categoria = lf.id_categoria
+		LEFT JOIN fonte_renda fr ON fr.id_fonte_renda = lf.id_fonte_renda
+		LEFT JOIN conta_fixa cf ON cf.id_conta_fixa = lf.id_conta_fixa
+		LEFT JOIN forma_pagamento fp ON fp.id_forma_pagamento = lf.id_forma_pagamento
+		WHERE 1=1`
+
+	args := []interface{}{}
+	argIndex := 1
+
+	if dataInicio != "" {
+		query += ` AND lf.data_lancamento >= $` + fmt.Sprintf("%d", argIndex)
+		args = append(args, dataInicio)
+		argIndex++
+	}
+
+	if dataFim != "" {
+		query += ` AND lf.data_lancamento <= $` + fmt.Sprintf("%d", argIndex)
+		args = append(args, dataFim)
+		argIndex++
+	}
+
+	if tipo != "" {
+		query += ` AND lf.tipo = $` + fmt.Sprintf("%d", argIndex)
+		args = append(args, tipo)
+		argIndex++
+	}
+
+	if idContaFixa != "" {
+		query += ` AND lf.id_conta_fixa = $` + fmt.Sprintf("%d", argIndex)
+		args = append(args, idContaFixa)
+		argIndex++
+	}
+
+	if idFonteRenda != "" {
+		query += ` AND lf.id_fonte_renda = $` + fmt.Sprintf("%d", argIndex)
+		args = append(args, idFonteRenda)
+		argIndex++
+	}
+
+	query += ` ORDER BY lf.data_lancamento DESC, lf.id_lancamento DESC`
+
+	rows, err := h.DB.Query(c, query, args...)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao listar lançamentos"})
 		return

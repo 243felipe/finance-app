@@ -102,6 +102,55 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/mercado/anotacoes-mercado/anotacoes-mercado.component').then((c) => c.AnotacoesMercadoComponent)
       },
+      {
+        path: 'relatorios/receita-salario',
+        loadComponent: () =>
+          import('./features/relatorios/receita-salario-relatorio/receita-salario-relatorio.component').then(
+            (c) => c.ReceitaSalarioRelatorioComponent
+          )
+      },
+      {
+        path: 'relatorios/receita-renda-extra',
+        loadComponent: () =>
+          import('./features/relatorios/receita-renda-extra-relatorio/receita-renda-extra-relatorio.component').then(
+            (c) => c.ReceitaRendaExtraRelatorioComponent
+          )
+      },
+      {
+        path: 'relatorios/despesa-contas-dia',
+        loadComponent: () =>
+          import('./features/relatorios/despesa-contas-dia-relatorio/despesa-contas-dia-relatorio.component').then(
+            (c) => c.DespesaContasDiaRelatorioComponent
+          )
+      },
+      {
+        path: 'relatorios/despesa-extras',
+        loadComponent: () =>
+          import('./features/relatorios/despesa-extras-relatorio/despesa-extras-relatorio.component').then(
+            (c) => c.DespesaExtrasRelatorioComponent
+          )
+      },
+      {
+        path: 'relatorios/pagamento-conta-fixa',
+        loadComponent: () =>
+          import('./features/relatorios/pagamento-conta-fixa-relatorio/pagamento-conta-fixa-relatorio.component').then(
+            (c) => c.PagamentoContaFixaRelatorioComponent
+          )
+      },
+      {
+        path: 'relatorios/recorrentes-entradas',
+        loadComponent: () =>
+          import('./features/relatorios/recorrentes-entradas-relatorio/recorrentes-entradas-relatorio.component').then(
+            (c) => c.RecorrentesEntradasRelatorioComponent
+          )
+      },
+      {
+        path: 'relatorios/recorrentes-saidas',
+        loadComponent: () =>
+          import('./features/relatorios/recorrentes-saidas-relatorio/recorrentes-saidas-relatorio.component').then(
+            (c) => c.RecorrentesSaidasRelatorioComponent
+          )
+      },
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' }
     ]
   },

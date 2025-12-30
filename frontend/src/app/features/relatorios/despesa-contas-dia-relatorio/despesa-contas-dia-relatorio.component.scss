@@ -1,0 +1,333 @@
+.relatorio-card {
+  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid rgba(13, 6, 100, 0.08);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm, 0 10px 30px rgba(0, 0, 0, 0.05));
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  height: auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+.search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .relatorio-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0d0664;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(13, 6, 100, 0.1);
+  }
+
+  .filtros-container {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(13, 6, 100, 0.05);
+  }
+
+  .filtros-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+
+    .filtro-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+      min-width: 200px;
+      max-width: 250px;
+
+      label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+
+        i {
+          color: #2563eb;
+          font-size: 0.875rem;
+        }
+      }
+
+      :host ::ng-deep {
+        .p-datepicker {
+          width: 100%;
+
+          .p-inputtext {
+            width: 100%;
+            padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: #ffffff;
+            color: #212529;
+
+            &:focus {
+              outline: none;
+              border-color: #2563eb;
+              box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            }
+
+            &:hover {
+              border-color: #adb5bd;
+            }
+          }
+
+          .p-datepicker-trigger {
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            padding: 0.75rem;
+
+            &:hover {
+              background: transparent;
+              color: #2563eb;
+            }
+          }
+
+          .p-datepicker-dropdown {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+
+          .p-datepicker-panel {
+            background: #ffffff;
+            color: #212529;
+
+            .p-datepicker-header {
+              background: #f8f9fa;
+              border-bottom: 1px solid #dee2e6;
+              color: #212529;
+
+              .p-datepicker-prev,
+              .p-datepicker-next {
+                color: #212529;
+
+                &:hover {
+                  background: #e9ecef;
+                  color: #2563eb;
+                }
+              }
+
+              .p-datepicker-title {
+                color: #212529;
+              }
+            }
+
+            .p-datepicker-calendar {
+              thead th {
+                color: #6c757d;
+                font-weight: 600;
+              }
+
+              tbody {
+                td {
+                  .p-datepicker-day {
+                    color: #212529;
+
+                    &:hover {
+                      background: #e9ecef;
+                      color: #212529;
+                    }
+
+                    &.p-datepicker-day-selected {
+                      background: #2563eb;
+                      color: #ffffff;
+                    }
+
+                    &.p-datepicker-day-today {
+                      background: #e3f2fd;
+                      color: #2563eb;
+                      font-weight: 600;
+                    }
+                  }
+                }
+              }
+            }
+
+            .p-datepicker-buttonbar {
+              background: #f8f9fa;
+              border-top: 1px solid #dee2e6;
+
+              button {
+                color: #212529;
+                background: transparent;
+
+                &:hover {
+                  background: #e9ecef;
+                  color: #2563eb;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .filtro-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-left: auto;
+      align-items: center;
+
+      button {
+        min-width: 140px;
+        height: 42px;
+      }
+    }
+  }
+}
+
+.table-scroll {
+  flex: 1;
+  min-height: 260px;
+  max-height: calc(100vh - 360px);
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-top: 1rem;
+
+  // Scrollbar customizado com cores claras
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
+    border: 1px solid #f8fafc;
+
+    &:hover {
+      background: #cbd5e1;
+    }
+  }
+}
+
+:host ::ng-deep .p-datatable-wrapper {
+  max-height: none;
+}
+
+:host ::ng-deep .p-datatable-scrollable-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+:host ::ng-deep .p-datatable-scrollable-body {
+  overflow-y: auto;
+
+  // Scrollbar customizado com cores claras
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
+    border: 1px solid #f8fafc;
+
+    &:hover {
+      background: #cbd5e1;
+    }
+  }
+}
+
+:host ::ng-deep .p-datatable {
+  .p-datatable-header {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #0d0664;
+    font-weight: 700;
+  }
+
+  .p-datatable-thead > tr > th {
+    background: #f1f5f9;
+    color: #0d0664;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 700;
+    padding: 1rem;
+  }
+
+  .p-datatable-tbody > tr {
+    background: #ffffff;
+    color: #0d0664;
+
+    > td {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 1rem;
+    }
+
+    &:hover {
+      background: #ffffff !important;
+      color: #0d0664 !important;
+    }
+  }
+
+  .p-datatable-tfoot > tr > td {
+    background: #f8fafc;
+    font-weight: 600;
+    padding: 1rem;
+    border-top: 2px solid #e2e8f0;
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.font-bold {
+  font-weight: 600;
+}
+
+.no-data {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #6c757d;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px dashed #dee2e6;
+  margin-top: 1rem;
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+
+    &::before {
+      content: '📊';
+      font-size: 1.5rem;
+    }
+  }
+}

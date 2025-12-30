@@ -101,6 +101,20 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
         { label: 'Lançamento - Mercado', icon: 'pi pi-dollar', route: '/mercado/lancamento' },
         { label: 'Anotações - Mercado', icon: 'pi pi-list', route: '/mercado/anotacoes' }
       ]
+    },
+    {
+      label: 'Relatórios',
+      icon: 'pi pi-file-pdf',
+      route: '',
+      children: [
+        { label: 'Receita - Salário', icon: 'pi pi-dollar', route: '/relatorios/receita-salario' },
+        { label: 'Receita - Renda Extra', icon: 'pi pi-dollar', route: '/relatorios/receita-renda-extra' },
+        { label: 'Despesa - Contas do Dia', icon: 'pi pi-book', route: '/relatorios/despesa-contas-dia' },
+        { label: 'Despesa - Extras', icon: 'pi pi-book', route: '/relatorios/despesa-extras' },
+        { label: 'Pagamento Conta Fixa', icon: 'pi pi-credit-card', route: '/relatorios/pagamento-conta-fixa' },
+        { label: 'Recorrentes - Entradas', icon: 'pi pi-refresh', route: '/relatorios/recorrentes-entradas' },
+        { label: 'Recorrentes - Saídas', icon: 'pi pi-refresh', route: '/relatorios/recorrentes-saidas' }
+      ]
     }
   ];
 

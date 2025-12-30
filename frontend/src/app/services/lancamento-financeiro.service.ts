@@ -28,5 +28,22 @@ export class LancamentoFinanceiroService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  listByDateRange(params: {
+    dataInicio?: string;
+    dataFim?: string;
+    tipo?: string;
+    idContaFixa?: number;
+    idFonteRenda?: number;
+  }): Observable<LancamentoFinanceiro[]> {
+    const queryParams = new URLSearchParams();
+    if (params.dataInicio) queryParams.append('dataInicio', params.dataInicio);
+    if (params.dataFim) queryParams.append('dataFim', params.dataFim);
+    if (params.tipo) queryParams.append('tipo', params.tipo);
+    if (params.idContaFixa) queryParams.append('idContaFixa', params.idContaFixa.toString());
+    if (params.idFonteRenda) queryParams.append('idFonteRenda', params.idFonteRenda.toString());
+    
+    return this.http.get<LancamentoFinanceiro[]>(`${this.baseUrl}/filtro?${queryParams.toString()}`);
+  }
 }
 
