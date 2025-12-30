@@ -33,6 +33,7 @@ $surface: #120b80;
 
 .sidebar {
   position: relative;
+  z-index: 0; // garante que o drawer cubra qualquer conteúdo por baixo ao fechar
   width: var(--sidebar);
   height: auto;
   min-height: 100vh;
@@ -48,6 +49,7 @@ $surface: #120b80;
   &.collapsed {
     width: 72px;
     padding: 1.25rem 0.75rem;
+    gap: 0.75rem;
 
     .title,
     .menu span,
@@ -57,6 +59,11 @@ $surface: #120b80;
       transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    .brand-title,
+    .brand-divider {
+      display: none;
+    }
+
     .brand {
       justify-content: center;
       margin: 0;
@@ -64,7 +71,7 @@ $surface: #120b80;
 
     .menu {
       align-items: center;
-      margin-top: 1rem;
+      margin-top: -8.25rem;
       width: 100%;
     }
 
@@ -147,9 +154,8 @@ $surface: #120b80;
       transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
     }
 
-    .brand-title,
-    .brand-divider {
-      display: none;
+    .menu {
+      margin-top: -8.25rem; // aproxima menu do logo/título quando aberto
     }
   }
 }
@@ -158,13 +164,32 @@ $surface: #120b80;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.15rem;
+  flex-direction: column;
+  margin-top: 0;
+  text-align: center;
 
   .brand-logo {
     max-width: 160px;
     width: 100%;
     height: auto;
     object-fit: contain;
+  }
+
+  .brand-title {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.56rem;
+    letter-spacing: 0.01em;
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .brand-divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.6);
+    margin-top: 1rem;
   }
 }
 
@@ -256,6 +281,7 @@ $surface: #120b80;
   box-sizing: border-box;
   transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  z-index: 0; // mantém o conteúdo atrás da sidebar
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -350,6 +376,113 @@ $surface: #120b80;
 .topbar-title {
   font-weight: 600;
   letter-spacing: 0.01em;
+}
+
+.tabs-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(13, 6, 100, 0.2) transparent;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(13, 6, 100, 0.2);
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(13, 6, 100, 0.3);
+  }
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  color: #0d0664;
+
+  &:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+  }
+
+  &.active {
+    background: #3418e8;
+    border-color: #3418e8;
+    color: #ffffff;
+
+    .tab-icon {
+      color: #ffffff;
+    }
+
+    .tab-close {
+      color: #ffffff;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+
+  .tab-icon {
+    font-size: 0.875rem;
+    color: #0d0664;
+    flex-shrink: 0;
+  }
+
+  .tab-label {
+    font-weight: 500;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tab-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.25rem;
+    color: #64748b;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background: rgba(13, 6, 100, 0.1);
+      color: #0d0664;
+    }
+
+    i {
+      font-size: 0.75rem;
+    }
+  }
 }
 
 .content {
