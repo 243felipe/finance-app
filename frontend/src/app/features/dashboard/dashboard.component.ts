@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { FixedAccountService } from '../../services/fixed-account.service';
+import { LancamentoFinanceiroService } from '../../services/lancamento-financeiro.service';
 import { AuthService } from '../../core/auth.service';
 
 type StatCard = {
@@ -37,8 +38,8 @@ type Notification = {
 export class DashboardComponent implements OnInit, OnDestroy {
   saudacao = '';
   cards: StatCard[] = [
+    { label: 'Pagto Conta Fixa (mês)', value: 'R$ 0,00', change: '', icon: 'pi pi-calendar' },
     { label: 'Contas Fixas', value: 'R$ 0,00', change: '', icon: 'pi pi-wallet' },
-    { label: 'Status OK', value: '98%', change: '+1,1%', icon: 'pi pi-check-circle' },
     { label: 'Métricas A/B', value: '312', change: '+3,1%', icon: 'pi pi-chart-bar' },
     { label: 'Alertas', value: '12', change: '-1,0%', icon: 'pi pi-exclamation-triangle' },
     { label: 'Clientes', value: '1.240', change: '+0,8%', icon: 'pi pi-users' }
@@ -69,6 +70,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private fixedAccountService: FixedAccountService,
+    private lancamentoService: LancamentoFinanceiroService,
     private authService: AuthService,
     private router: Router,
     private activatedRoute: ActivatedRoute
@@ -95,6 +97,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private carregarDados(): void {
     this.atualizarSaudacao();
+    this.carregarTotalPagamentosContaFixaMes();
     this.carregarTotalContasFixas();
     // Setup dos charts só precisa ser feito uma vez
     if (!this.lineData) {
@@ -107,12 +110,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: (res) => {
         const total = res.total ?? 0;
         this.cards = [
+          this.cards[0],
           { label: 'Contas Fixas', value: this.formatCurrency(total), change: '', icon: 'pi pi-wallet' },
-          ...this.cards.slice(1)
+          ...this.cards.slice(2)
         ];
       },
       error: (err) => {
         console.error('Erro ao buscar total de contas fixas', err);
+      }
+    });
+  }
+
+  private carregarTotalPagamentosContaFixaMes(): void {
+    this.lancamentoService.list().subscribe({
+      next: (lancs) => {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const total = (lancs || [])
+          .filter(
+            (l) =>
+              l.tipo === 'S' &&
+              l.idContaFixa !== null &&
+              l.idContaFixa !== undefined &&
+              (() => {
+                const d = new Date(l.dataLancamento);
+                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+              })()
+          )
+          .reduce((sum, l) => sum + (l.valor || 0), 0);
+
+        this.cards = [
+          { label: 'Pagto Conta Fixa (mês)', value: this.formatCurrency(total), change: '', icon: 'pi pi-calendar' },
+          ...this.cards.slice(1)
+        ];
+      },
+      error: (err) => {
+        console.error('Erro ao buscar pagamentos de conta fixa do mês', err);
       }
     });
   }

@@ -50,27 +50,33 @@ export const routes: Routes = [
       },
       {
         path: 'lancamentos/receita/renda-extra',
-        loadComponent: () =>
-          import('./features/shared/placeholder-page.component').then((c) => c.PlaceholderPageComponent),
-        data: { title: 'Lançar Receita - Renda Extra' }
+    loadComponent: () =>
+      import('./features/lancamentos/receita-renda-extra/receita-renda-extra.component').then(
+        (c) => c.ReceitaRendaExtraComponent
+      ),
+    data: { title: 'Lançar Receita - Renda Extra' }
       },
       {
         path: 'lancamentos/despesa/contas-dia',
-        loadComponent: () =>
-          import('./features/shared/placeholder-page.component').then((c) => c.PlaceholderPageComponent),
-        data: { title: 'Lançar Despesa - Contas do Dia' }
+    loadComponent: () =>
+      import('./features/lancamentos/despesa-contas-dia/despesa-contas-dia.component').then(
+        (c) => c.DespesaContasDiaComponent
+      ),
+    data: { title: 'Lançar Despesa - Contas do Dia' }
       },
       {
         path: 'lancamentos/despesa/despesas-extras',
-        loadComponent: () =>
-          import('./features/shared/placeholder-page.component').then((c) => c.PlaceholderPageComponent),
-        data: { title: 'Lançar Despesa - Despesas Extras' }
+    loadComponent: () =>
+      import('./features/lancamentos/despesa-extra/despesa-extra.component').then((c) => c.DespesaExtraComponent),
+    data: { title: 'Lançar Despesa - Despesas Extras' }
       },
       {
         path: 'lancamentos/pagamento-conta-fixa',
-        loadComponent: () =>
-          import('./features/shared/placeholder-page.component').then((c) => c.PlaceholderPageComponent),
-        data: { title: 'Pagamento de Conta Fixa' }
+    loadComponent: () =>
+      import('./features/lancamentos/pagamento-conta-fixa/pagamento-conta-fixa.component').then(
+        (c) => c.PagamentoContaFixaComponent
+      ),
+    data: { title: 'Pagamento de Conta Fixa' }
       },
       {
         path: 'lancamentos/recorrentes/entradas',

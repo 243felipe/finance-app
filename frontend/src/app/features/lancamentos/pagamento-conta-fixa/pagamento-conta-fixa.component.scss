@@ -1,0 +1,234 @@
+.pagamento-conta-fixa-card {
+  padding: 1.5rem;
+  background: #ffffff;
+  border: 1px solid rgba(13, 6, 100, 0.08);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm, 0 10px 30px rgba(0, 0, 0, 0.05));
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+.card-surface.pagamento-conta-fixa-card {
+  background: #ffffff !important;
+  color: #0d0664;
+}
+
+.search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  label {
+    font-weight: 600;
+    color: #0d0664;
+  }
+
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+
+    input {
+      flex: 1;
+      min-height: 42px;
+      max-width: 360px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+
+      button {
+        min-height: 42px;
+      }
+
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid #cbd5e1;
+        color: #0d0664;
+      }
+
+      .btn-ghost:hover {
+        background: #f8fafc;
+      }
+
+      .btn-primary {
+        background: #3418e8;
+        border: 1px solid #3418e8;
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background: #2c14c5;
+        border-color: #2c14c5;
+      }
+
+      .btn-danger {
+        background: #ef4444;
+        border: 1px solid #ef4444;
+        color: #ffffff;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+      }
+    }
+  }
+}
+
+.dialog-form {
+  display: grid;
+  gap: 0.75rem;
+
+  .field {
+    display: grid;
+    gap: 0.3rem;
+
+    label {
+      font-weight: 600;
+      color: #0d0664;
+    }
+  }
+
+  .two-cols {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.75rem;
+    align-items: start;
+
+    > div {
+      display: grid;
+      gap: 0.35rem;
+      align-content: start;
+    }
+  }
+
+  .money-input {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.35rem;
+    max-width: 220px;
+
+    .prefix {
+      padding: 0.65rem 0.75rem;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      color: #0d0664;
+      font-weight: 600;
+      min-width: 52px;
+      text-align: center;
+    }
+
+    input {
+      min-width: 0;
+      min-height: 42px;
+    }
+  }
+
+  .checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    input {
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.error {
+  color: #ef4444;
+}
+
+.table-scroll {
+  flex: 1;
+  min-height: 260px;
+  max-height: calc(100vh - 360px);
+  overflow: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+::host ::ng-deep .p-datatable-wrapper,
+::host ::ng-deep .p-datatable-table {
+  background: #ffffff !important;
+}
+
+::host ::ng-deep .p-datatable {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+// Cabeçalho claro
+::host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  background: #f5f7fb !important;
+  color: #0d0664 !important;
+  font-weight: 700;
+  border-color: #e2e8f0 !important;
+}
+
+// Linhas claras
+::host ::ng-deep .p-datatable .p-datatable-tbody > tr {
+  background: #ffffff !important;
+  color: #0d0664 !important;
+  transition: background 0.15s ease;
+}
+
+::host ::ng-deep .p-datatable .p-datatable-tbody > tr:nth-child(even) {
+  background: #f9fbfd !important;
+}
+
+::host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  border-color: #eef2f7 !important;
+  color: #0d0664 !important;
+}
+
+::host ::ng-deep .p-datatable .p-datatable-tbody > tr:hover {
+  background: #f8fafc !important;
+}
+
+::host ::ng-deep .p-dialog-mask {
+  background: rgba(241, 245, 249, 0.55);
+}
+
+::host ::ng-deep .p-dialog {
+  border-radius: 18px;
+  overflow: hidden;
+
+  .p-dialog-header {
+    background: #ffffff;
+    color: #0d0664;
+    font-weight: 700;
+    padding: 1rem 1.25rem;
+  }
+
+  .p-dialog-content {
+    background: #f8fafc;
+    padding: 1.25rem;
+  }
+
+  .p-dialog-footer {
+    background: #f8fafc;
+    padding: 0 1.25rem 1.25rem;
+  }
+}
+
