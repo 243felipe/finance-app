@@ -34,19 +34,24 @@
     align-items: center;
     gap: 0.5rem;
     width: 100%;
+    flex-wrap: wrap;
 
     input {
       flex: 1;
       min-height: 42px;
       max-width: 360px;
+      min-width: 200px;
     }
 
     .actions {
       display: flex;
       gap: 0.5rem;
+      flex-wrap: wrap;
 
       button {
         min-height: 42px;
+        flex: 1;
+        min-width: 100px;
       }
 
       .btn-ghost {
@@ -239,4 +244,61 @@
 :host ::ng-deep .p-checkbox .p-checkbox-icon {
   color: #4f46e5;
   font-size: 12px;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .categories-card {
+    padding: 1rem;
+  }
+
+  .search-bar {
+    .search-row {
+      flex-direction: column;
+      align-items: stretch;
+
+      input {
+        max-width: 100%;
+        min-width: 0;
+      }
+
+      .actions {
+        width: 100%;
+
+        button {
+          flex: 1;
+          min-width: 0;
+        }
+      }
+    }
+  }
+
+  .table-scroll {
+    max-height: calc(100vh - 400px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  :host ::ng-deep .p-dialog {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 1rem auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .categories-card {
+    padding: 0.75rem;
+  }
+
+  .search-bar {
+    .search-row {
+      .actions {
+        button {
+          font-size: 0.875rem;
+          padding: 0.5rem 0.75rem;
+        }
+      }
+    }
+  }
 }

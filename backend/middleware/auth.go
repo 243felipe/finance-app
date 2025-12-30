@@ -36,9 +36,13 @@ func Auth(secret string) gin.HandlerFunc {
 		}
 
 		c.Set("userId", claims["userId"])
+		if login, ok := claims["login"].(string); ok {
+			c.Set("userLogin", login)
+		}
 		c.Next()
 	}
 }
+
 
 
 

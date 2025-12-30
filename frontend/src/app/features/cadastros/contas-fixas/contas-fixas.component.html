@@ -1,6 +1,6 @@
 <section class="card-surface contas-card">
   <div class="search-bar">
-    <label for="filtro">Descrição</label>
+    <label for="filtro">Contas Fixas</label>
     <div class="search-row">
       <input id="filtro" type="text" pInputText [(ngModel)]="filtro" placeholder="Buscar por nome" />
       <div class="actions">
@@ -65,7 +65,7 @@
   </div>
 </section>
 
-<p-dialog header="Cadastrar conta fixa" [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '560px' }" [closable]="false">
+<p-dialog [header]="editingId ? 'Editar conta fixa' : 'Cadastrar conta fixa'" [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '560px' }" [closable]="false">
   <form [formGroup]="form" class="dialog-form">
     <div class="field">
       <label for="nome">Nome</label>

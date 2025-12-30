@@ -13,16 +13,16 @@
 
       <form [formGroup]="form" (ngSubmit)="submit()" class="form" novalidate>
         <div class="field-group">
-          <label for="login">Email</label>
+          <label for="login">Login</label>
           <input
             pInputText
             id="login"
             formControlName="login"
             autocomplete="username"
-            placeholder="Digite seu email"
+            placeholder="ID"
           />
           <small *ngIf="form.get('login')?.invalid && form.get('login')?.touched" class="error">
-            Informe o e-mail.
+            Informe seu ID de acesso.
           </small>
         </div>
 

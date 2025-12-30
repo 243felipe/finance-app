@@ -37,6 +37,7 @@ export class CategoriasFinanceirasComponent implements OnInit {
   dialogVisible = false;
   saving = false;
   loading = false;
+  editingId: number | null = null;
   selecionado: FinancialCategory[] = [];
 
   tipos = [
@@ -86,7 +87,21 @@ export class CategoriasFinanceirasComponent implements OnInit {
   }
 
   abrirModal(): void {
+    this.editingId = null;
     this.form.reset({ ativo: true, tipo: null });
+    this.dialogVisible = true;
+  }
+
+  editar(): void {
+    if (!this.selecionado || this.selecionado.length !== 1) return;
+    const item = this.selecionado[0];
+    this.editingId = item.id;
+    this.form.reset({
+      nome: item.nome,
+      tipo: item.tipo,
+      descricao: item.descricao,
+      ativo: item.ativo
+    });
     this.dialogVisible = true;
   }
 
@@ -97,11 +112,20 @@ export class CategoriasFinanceirasComponent implements OnInit {
     }
     this.saving = true;
     const payload = this.form.value as Omit<FinancialCategory, 'id' | 'criadoEm' | 'atualizadoEm'>;
-    this.service.create(payload).subscribe({
-      next: (novo) => {
-        this.itens = [novo, ...this.itens];
+    const request$ = this.editingId
+      ? this.service.update(this.editingId, payload)
+      : this.service.create(payload);
+
+    request$.subscribe({
+      next: (entity) => {
+        if (this.editingId) {
+          this.itens = this.itens.map((i) => (i.id === entity.id ? entity : i));
+        } else {
+          this.itens = [entity, ...this.itens];
+        }
         this.saving = false;
         this.dialogVisible = false;
+        this.editingId = null;
       },
       error: (err) => {
         console.error('Erro ao salvar categoria financeira', err);

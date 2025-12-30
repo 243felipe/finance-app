@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { ChartModule } from 'primeng/chart';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { FixedAccountService } from '../../services/fixed-account.service';
 import { AuthService } from '../../core/auth.service';
 
@@ -31,7 +34,7 @@ type Notification = {
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   saudacao = '';
   cards: StatCard[] = [
     { label: 'Contas Fixas', value: 'R$ 0,00', change: '', icon: 'pi pi-wallet' },
@@ -62,12 +65,41 @@ export class DashboardComponent implements OnInit {
   doughnutData: any;
   doughnutOptions: any;
 
-  constructor(private fixedAccountService: FixedAccountService, private authService: AuthService) {}
+  private routerSubscription?: Subscription;
+
+  constructor(
+    private fixedAccountService: FixedAccountService,
+    private authService: AuthService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
+    this.carregarDados();
+    
+    // Observa mudanças de rota para recarregar dados sempre que o dashboard for acessado
+    this.routerSubscription = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        const navigationEnd = event as NavigationEnd;
+        // Se a rota atual é o dashboard, recarrega os dados
+        if (navigationEnd.urlAfterRedirects === '/dashboard') {
+          this.carregarDados();
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSubscription?.unsubscribe();
+  }
+
+  private carregarDados(): void {
     this.atualizarSaudacao();
     this.carregarTotalContasFixas();
-    this.setupCharts();
+    // Setup dos charts só precisa ser feito uma vez
+    if (!this.lineData) {
+      this.setupCharts();
+    }
   }
 
   private carregarTotalContasFixas(): void {
@@ -191,8 +223,8 @@ export class DashboardComponent implements OnInit {
 
   private atualizarSaudacao(): void {
     const hora = new Date().getHours();
-    const login = this.authService.getLogin();
-    const nome = login ? login : 'Usuário';
+    const name = this.authService.getName();
+    const nome = name ? name : 'Usuário';
     if (hora < 12) {
       this.saudacao = `Bom dia, ${nome}!`;
     } else if (hora < 18) {

@@ -9,6 +9,15 @@
         <button
           pButton
           type="button"
+          label="Editar"
+          icon="pi pi-pencil"
+          class="btn-primary"
+          (click)="editar()"
+          [disabled]="!selecionado || selecionado.length !== 1"
+        ></button>
+        <button
+          pButton
+          type="button"
           label="Excluir"
           icon="pi pi-trash"
           class="btn-danger"
@@ -52,7 +61,7 @@
   </div>
 </section>
 
-<p-dialog header="Cadastrar categoria" [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '520px' }" [closable]="false">
+<p-dialog [header]="editingId ? 'Editar categoria' : 'Cadastrar categoria'" [(visible)]="dialogVisible" [modal]="true" [style]="{ width: '520px' }" [closable]="false">
   <form [formGroup]="form" class="dialog-form">
     <div class="field">
       <label for="nome">Nome</label>

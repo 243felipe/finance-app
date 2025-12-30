@@ -1,8 +1,14 @@
 import { CommonModule, NgIf } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Input, OnDestroy, ViewChild } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
+import { TabsService, Tab } from '../../core/tabs.service';
+import { SessionTimeoutService } from '../../core/session-timeout.service';
 
 type MenuItem = {
   label: string;
@@ -14,14 +20,52 @@ type MenuItem = {
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [CommonModule, NgIf, RouterOutlet, RouterLink, RouterLinkActive, ButtonModule],
+  imports: [
+    CommonModule,
+    NgIf,
+    FormsModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    ButtonModule,
+    DialogModule,
+    InputTextModule
+  ],
   templateUrl: './shell.component.html',
-  styleUrl: './shell.component.scss'
+  styleUrls: ['./shell.component.scss']
 })
-export class ShellComponent implements AfterViewInit {
+export class ShellComponent implements AfterViewInit, OnDestroy {
   @Input() title = 'Portal';
   collapsed = true; // inicia fechado
   expanded: Record<string, boolean> = {};
+  tabs: Tab[] = [];
+  private tabsSubscription?: Subscription;
+  isMobile = window.innerWidth <= 900;
+
+  // User menu
+  userMenuOpen = false;
+  dropdownPosition = { top: 0, right: 0 };
+  @ViewChild('userMenuContainer', { read: ElementRef }) userMenuContainer?: ElementRef<HTMLDivElement>;
+  @ViewChild('userBtn', { read: ElementRef }) userBtn?: ElementRef<HTMLButtonElement>;
+
+  // Profile modal
+  profileModalVisible = false;
+  profileName = '';
+  profileLogin = '';
+  profilePassword = '';
+  editingName = false;
+  editingLogin = false;
+  editingPassword = false;
+  savingName = false;
+  savingLogin = false;
+  savingPassword = false;
+
+  // Logout confirm modal
+  logoutConfirmModalVisible = false;
+
+  // Session timeout modal
+  sessionTimeoutWarningVisible = false;
+  private sessionTimeoutSubscription?: Subscription;
 
   @ViewChild('mainEl') mainEl?: ElementRef<HTMLDivElement>;
   @ViewChild('contentEl') contentEl?: ElementRef<HTMLElement>;
@@ -52,13 +96,46 @@ export class ShellComponent implements AfterViewInit {
         { label: 'Recorrentes - Entradas', icon: 'pi pi-refresh', route: '/lancamentos/recorrentes/entradas' },
         { label: 'Recorrentes - Saídas', icon: 'pi pi-refresh', route: '/lancamentos/recorrentes/saidas' }
       ]
+    },
+    {
+      label: 'Mercado',
+      icon: 'pi pi-shopping-cart',
+      route: '',
+      children: [
+        { label: 'Lançamento - Mercado', icon: 'pi pi-dollar', route: '/mercado/lancamento' },
+        { label: 'Anotações - Mercado', icon: 'pi pi-list', route: '/mercado/anotacoes' }
+      ]
     }
   ];
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private tabsService: TabsService,
+    private sessionTimeoutService: SessionTimeoutService
+  ) {
+    this.tabsSubscription = this.tabsService.tabs$.subscribe((tabs) => {
+      this.tabs = tabs;
+    });
+
+    // Observa o aviso de timeout de sessão
+    this.sessionTimeoutSubscription = this.sessionTimeoutService.showWarning$.subscribe((showWarning) => {
+      this.sessionTimeoutWarningVisible = showWarning;
+    });
+  }
 
   ngAfterViewInit(): void {
+    this.updateIsMobile();
     setTimeout(() => this.logSizes('init'), 0);
+    // Garante que o Dashboard sempre esteja presente
+    this.tabsService.addTab('/dashboard');
+    // Adiciona a aba atual se já houver uma rota ativa
+    const currentRoute = this.router.url;
+    if (currentRoute && currentRoute !== '/login' && currentRoute !== '/dashboard') {
+      this.tabsService.addTab(currentRoute);
+    }
+    // Inicializa o monitoramento de timeout de sessão
+    this.sessionTimeoutService.initialize();
   }
 
   toggle(): void {
@@ -67,6 +144,13 @@ export class ShellComponent implements AfterViewInit {
       this.expanded = {};
     }
     requestAnimationFrame(() => this.logSizes('toggle'));
+  }
+
+  onMenuClick(): void {
+    // Fecha o drawer em mobile após clicar em um item do menu
+    if (this.isMobile && !this.collapsed) {
+      this.collapsed = true;
+    }
   }
 
   toggleParent(item: MenuItem): void {
@@ -79,10 +163,203 @@ export class ShellComponent implements AfterViewInit {
     this.router.navigate(['/login']);
   }
 
+  // User menu methods
+  toggleUserMenu(): void {
+    this.userMenuOpen = !this.userMenuOpen;
+    if (this.userMenuOpen && this.userBtn?.nativeElement) {
+      const rect = this.userBtn.nativeElement.getBoundingClientRect();
+      this.dropdownPosition = {
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right
+      };
+    }
+  }
+
+  closeUserMenu(): void {
+    this.userMenuOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.userMenuContainer?.nativeElement && !this.userMenuContainer.nativeElement.contains(event.target as Node)) {
+      this.closeUserMenu();
+    }
+  }
+
+  // Profile modal methods
+  openProfileModal(): void {
+    this.closeUserMenu();
+    this.profileModalVisible = true;
+    this.loadProfile();
+  }
+
+  closeProfileModal(): void {
+    this.profileModalVisible = false;
+    this.editingName = false;
+    this.editingLogin = false;
+    this.editingPassword = false;
+    this.profileName = '';
+    this.profileLogin = '';
+    this.profilePassword = '';
+  }
+
+  loadProfile(): void {
+    this.auth.getProfile().subscribe({
+      next: (profile) => {
+        this.profileName = profile.name || '';
+        this.profileLogin = profile.login || '';
+        this.profilePassword = '';
+      },
+      error: (err) => {
+        console.error('Erro ao carregar perfil:', err);
+      }
+    });
+  }
+
+  toggleEditName(): void {
+    if (this.editingName) {
+      this.saveName();
+    } else {
+      this.editingName = true;
+    }
+  }
+
+  saveName(): void {
+    if (!this.profileName.trim()) {
+      return;
+    }
+    this.savingName = true;
+    this.auth.updateProfile({ name: this.profileName }).subscribe({
+      next: () => {
+        this.savingName = false;
+        this.closeProfileModal();
+        // Navega para o dashboard (ele recarrega automaticamente os dados)
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        console.error('Erro ao salvar nome:', err);
+        this.savingName = false;
+      }
+    });
+  }
+
+  toggleEditLogin(): void {
+    if (this.editingLogin) {
+      this.saveLogin();
+    } else {
+      this.editingLogin = true;
+    }
+  }
+
+  saveLogin(): void {
+    if (!this.profileLogin.trim()) {
+      return;
+    }
+    this.savingLogin = true;
+    this.auth.updateProfile({ login: this.profileLogin }).subscribe({
+      next: () => {
+        this.savingLogin = false;
+        this.closeProfileModal();
+        // Navega para o dashboard (ele recarrega automaticamente os dados)
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        console.error('Erro ao salvar login:', err);
+        this.savingLogin = false;
+      }
+    });
+  }
+
+  toggleEditPassword(): void {
+    if (this.editingPassword) {
+      this.savePassword();
+    } else {
+      this.editingPassword = true;
+      this.profilePassword = '';
+    }
+  }
+
+  savePassword(): void {
+    if (!this.profilePassword.trim()) {
+      return;
+    }
+    this.savingPassword = true;
+    this.auth.updateProfile({ password: this.profilePassword }).subscribe({
+      next: () => {
+        this.savingPassword = false;
+        this.closeProfileModal();
+        // Navega para o dashboard (ele recarrega automaticamente os dados)
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        console.error('Erro ao salvar senha:', err);
+        this.savingPassword = false;
+      }
+    });
+  }
+
+  // Logout confirm modal methods
+  openLogoutConfirmModal(): void {
+    this.closeUserMenu();
+    this.logoutConfirmModalVisible = true;
+  }
+
+  closeLogoutConfirmModal(): void {
+    this.logoutConfirmModalVisible = false;
+  }
+
+  confirmLogout(): void {
+    this.closeLogoutConfirmModal();
+    this.logout();
+  }
+
+  navigateToTab(tab: Tab): void {
+    this.tabsService.navigateToTab(tab);
+    // Fecha o drawer em mobile após navegação
+    if (window.innerWidth <= 900 && !this.collapsed) {
+      this.collapsed = true;
+    }
+  }
+
+  closeTab(tab: Tab, event: Event): void {
+    event.stopPropagation(); // Previne a navegação ao clicar no X
+    this.tabsService.removeTab(tab.id);
+  }
+
+  isActiveTab(tab: Tab): boolean {
+    return this.router.url === tab.route || this.router.url.startsWith(tab.route + '/');
+  }
+
+  ngOnDestroy(): void {
+    this.tabsSubscription?.unsubscribe();
+    this.sessionTimeoutSubscription?.unsubscribe();
+  }
+
+  // Session timeout methods
+  extendSession(): void {
+    this.sessionTimeoutService.extendSession();
+    this.sessionTimeoutWarningVisible = false;
+  }
+
+  handleSessionTimeout(): void {
+    this.sessionTimeoutService.logout();
+    this.sessionTimeoutWarningVisible = false;
+  }
+
   private logSizes(tag: string): void {
     const mainW = this.mainEl?.nativeElement.clientWidth ?? 0;
     const contentW = this.contentEl?.nativeElement.clientWidth ?? 0;
     // eslint-disable-next-line no-console
     console.log(`[shell] ${tag} | collapsed=${this.collapsed} | main=${mainW}px | content=${contentW}px`);
   }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateIsMobile();
+  }
+
+  private updateIsMobile(): void {
+    this.isMobile = window.innerWidth <= 900;
+  }
 }
+
