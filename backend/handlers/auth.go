@@ -133,6 +133,15 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	// Gera lançamentos recorrentes automaticamente após login bem-sucedido
+	// Executa em background para não atrasar a resposta
+	go func() {
+		recorrenteHandler := LancamentoRecorrenteHandler{DB: h.DB}
+		if err := recorrenteHandler.GerarLancamentosAutomaticos(c.Request.Context()); err != nil {
+			log.Printf("Erro ao gerar lançamentos recorrentes: %v", err)
+		}
+	}()
+
 	c.JSON(http.StatusOK, loginResponse{Token: token, Name: user.Name})
 }
 

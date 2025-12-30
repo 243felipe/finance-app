@@ -21,7 +21,6 @@
         [disabled]="!listaSelecionadaId"
       />
       <div class="actions">
-        <button pButton type="button" label="Pesquisar" icon="pi pi-search" class="btn-ghost" (click)="pesquisar()" [disabled]="!listaSelecionadaId"></button>
         <button pButton type="button" label="Cadastrar" icon="pi pi-plus" class="btn-primary" (click)="abrirModal()" [disabled]="!listaSelecionadaId"></button>
         <button
           pButton
@@ -41,6 +40,8 @@
           (click)="excluir()"
           [disabled]="!selecionado || selecionado.length === 0"
         ></button>
+        <button pButton type="button" label="Atualizar" icon="pi pi-refresh" class="btn-primary" (click)="carregarItens()" [disabled]="!listaSelecionadaId"></button>
+        <button pButton type="button" icon="pi pi-info-circle" class="btn-info" (click)="abrirModalAjuda()" title="Ajuda"></button>
       </div>
     </div>
   </div>
@@ -142,5 +143,50 @@
       <button pButton type="button" label="Salvar" [loading]="saving" (click)="salvar()" autofocus></button>
     </div>
   </form>
+</p-dialog>
+
+<p-dialog 
+  header="🛒 TELA: MERCADO" 
+  [(visible)]="ajudaDialogVisible" 
+  [modal]="true" 
+  [style]="{ width: '850px' }"
+  [closable]="true"
+>
+  <div class="ajuda-content">
+    <div class="ajuda-coluna">
+      <div class="ajuda-section">
+        <h3>📌 Explicação da tela</h3>
+        <p>A tela de mercado facilita o lançamento de compras do dia a dia, permitindo registrar rapidamente vários itens em uma única compra.</p>
+        <p>O sistema soma os itens automaticamente e gera uma única saída financeira.</p>
+      </div>
+
+      <div class="ajuda-section">
+        <p><strong>📌 O valor total da compra será registrado como uma saída.</strong></p>
+      </div>
+    </div>
+
+    <div class="ajuda-coluna">
+      <div class="ajuda-section">
+        <h3>⚙️ O que essa tela influencia</h3>
+        <ul>
+          <li>Controle de gastos com mercado</li>
+          <li>Detalhamento por item</li>
+          <li>Relatórios de alimentação</li>
+        </ul>
+      </div>
+
+      <div class="ajuda-section">
+        <h3>🧠 Exemplo prático</h3>
+        <p><strong>Compra no mercado:</strong></p>
+        <ul>
+          <li>Coca-Cola – R$ 6,00</li>
+          <li>Arroz – R$ 25,00</li>
+          <li>Carne – R$ 40,00</li>
+        </ul>
+        <p><strong>👉 Total lançado: R$ 71,00</strong></p>
+        <p><strong>👉 Aparece no dashboard como saída</strong></p>
+      </div>
+    </div>
+  </div>
 </p-dialog>
 

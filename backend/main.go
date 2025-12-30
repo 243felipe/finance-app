@@ -38,8 +38,10 @@ func main() {
 	fonteRendaHandler := handlers.FonteRendaHandler{DB: pool}
 	formaPagamentoHandler := handlers.FormaPagamentoHandler{DB: pool}
 	lancamentoHandler := handlers.LancamentoHandler{DB: pool}
+	lancamentoRecorrenteHandler := handlers.LancamentoRecorrenteHandler{DB: pool}
 	listaComprasHandler := handlers.ListaComprasHandler{DB: pool}
 	itemListaComprasHandler := handlers.ItemListaComprasHandler{DB: pool}
+	dashboardHandler := handlers.DashboardHandler{DB: pool}
 
 	// Responde na raiz para evitar 404 em verificações externas.
 	router.GET("/", func(c *gin.Context) {
@@ -96,6 +98,12 @@ func main() {
 			secured.PUT("/lancamentos/:id", lancamentoHandler.Update)
 			secured.DELETE("/lancamentos/:id", lancamentoHandler.Delete)
 
+			secured.GET("/lancamentos-recorrentes/entradas", lancamentoRecorrenteHandler.ListEntradas)
+			secured.GET("/lancamentos-recorrentes/saidas", lancamentoRecorrenteHandler.ListSaidas)
+			secured.POST("/lancamentos-recorrentes", lancamentoRecorrenteHandler.Create)
+			secured.PUT("/lancamentos-recorrentes/:id", lancamentoRecorrenteHandler.Update)
+			secured.DELETE("/lancamentos-recorrentes/:id", lancamentoRecorrenteHandler.Delete)
+
 			secured.GET("/lista-compras", listaComprasHandler.List)
 			secured.GET("/lista-compras/:id", listaComprasHandler.Get)
 			secured.POST("/lista-compras", listaComprasHandler.Create)
@@ -107,6 +115,11 @@ func main() {
 			secured.POST("/item-lista-compras", itemListaComprasHandler.Create)
 			secured.PUT("/item-lista-compras/:id", itemListaComprasHandler.Update)
 			secured.DELETE("/item-lista-compras/:id", itemListaComprasHandler.Delete)
+
+			// Dashboard endpoints
+			secured.GET("/dashboard/cards", dashboardHandler.GetCards)
+			secured.GET("/dashboard/charts", dashboardHandler.GetCharts)
+			secured.GET("/dashboard/lancamentos-saidas-mes", dashboardHandler.GetLancamentosSaidasMes)
 		}
 	}
 

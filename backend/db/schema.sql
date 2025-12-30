@@ -167,6 +167,46 @@ BEFORE UPDATE ON lancamento_financeiro
 FOR EACH ROW
 EXECUTE PROCEDURE set_lancamento_financeiro_atualizado();
 
+-- Adiciona campo para identificar lançamentos gerados automaticamente
+ALTER TABLE lancamento_financeiro 
+ADD COLUMN IF NOT EXISTS gerado_recorrente BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- Tabela de lançamentos recorrentes (modelo de lançamento, não referência a um existente)
+CREATE TABLE IF NOT EXISTS lancamento_recorrente (
+    id_recorrente SERIAL PRIMARY KEY,
+    tipo CHAR(1) NOT NULL CHECK (tipo IN ('E','S')),
+    descricao VARCHAR(150) NOT NULL,
+    valor NUMERIC(12,2) NOT NULL CHECK (valor > 0),
+    id_categoria INT NOT NULL,
+    id_fonte_renda INT,
+    id_forma_pagamento INT,
+    periodicidade VARCHAR(10) NOT NULL CHECK (periodicidade IN ('MENSAL', 'ANUAL')),
+    dia_execucao INT NOT NULL CHECK (dia_execucao BETWEEN 1 AND 31),
+    data_inicio DATE NOT NULL,
+    data_fim DATE,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    observacao VARCHAR(255),
+    criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP,
+    CONSTRAINT fk_recorrente_categoria FOREIGN KEY (id_categoria) REFERENCES categoria_financeira (id_categoria),
+    CONSTRAINT fk_recorrente_fonte_renda FOREIGN KEY (id_fonte_renda) REFERENCES fonte_renda (id_fonte_renda),
+    CONSTRAINT fk_recorrente_forma_pagamento FOREIGN KEY (id_forma_pagamento) REFERENCES forma_pagamento (id_forma_pagamento)
+);
+
+CREATE OR REPLACE FUNCTION set_lancamento_recorrente_atualizado()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.atualizado_em = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_lancamento_recorrente_atualizado ON lancamento_recorrente;
+CREATE TRIGGER trg_lancamento_recorrente_atualizado
+BEFORE UPDATE ON lancamento_recorrente
+FOR EACH ROW
+EXECUTE PROCEDURE set_lancamento_recorrente_atualizado();
+
 -- Usuários padrão (login/senha simples)
 INSERT INTO users (name, login, email, password_plain)
 VALUES 

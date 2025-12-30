@@ -81,7 +81,9 @@ export const routes: Routes = [
       {
         path: 'lancamentos/recorrentes/entradas',
         loadComponent: () =>
-          import('./features/shared/placeholder-page.component').then((c) => c.PlaceholderPageComponent),
+          import('./features/lancamentos/recorrentes-entradas/recorrentes-entradas.component').then(
+            (c) => c.RecorrentesEntradasComponent
+          ),
         data: { title: 'Lançamentos Recorrentes - Entradas' }
       },
       {

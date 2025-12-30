@@ -1,4 +1,10 @@
 <div class="shell" [class.collapsed]="collapsed">
+  <div 
+    class="sidebar-overlay" 
+    [class.visible]="isMobile && !collapsed"
+    (click)="toggle()"
+    *ngIf="isMobile"
+  ></div>
   <aside class="sidebar" [class.collapsed]="collapsed">
     <div class="brand">
       <img src="/images/logo_unica_login.png" alt="Logo" class="brand-logo" />
@@ -16,7 +22,7 @@
             <span>{{ item.label }}</span>
             <i *ngIf="!collapsed" class="pi pi-chevron-down chevron" [class.open]="expanded[item.label]"></i>
           </div>
-          <div class="submenu" *ngIf="expanded[item.label] && !collapsed">
+          <div class="submenu" [class.expanded]="expanded[item.label] && !collapsed" *ngIf="!collapsed">
             <a
               *ngFor="let child of item.children"
               [routerLink]="child.route"

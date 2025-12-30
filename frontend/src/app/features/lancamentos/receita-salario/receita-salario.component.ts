@@ -28,6 +28,7 @@ import { FormaPagamento } from '../../../models/forma-pagamento';
 export class ReceitaSalarioComponent implements OnInit {
   filtro = '';
   dialogVisible = false;
+  ajudaDialogVisible = false;
   saving = false;
   loading = false;
   editingId: number | null = null;
@@ -72,7 +73,7 @@ export class ReceitaSalarioComponent implements OnInit {
     return this.itens.filter((i) => i.descricao.toLowerCase().includes(f));
   }
 
-  private carregar(): void {
+  carregar(): void {
     this.loading = true;
     forkJoin([
       this.service.list(),
@@ -94,10 +95,6 @@ export class ReceitaSalarioComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
-
-  pesquisar(): void {
-    // filtro via getter
   }
 
   abrirModal(): void {
@@ -206,6 +203,10 @@ export class ReceitaSalarioComponent implements OnInit {
 
   private formatCurrency(num: number): string {
     return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  abrirModalAjuda(): void {
+    this.ajudaDialogVisible = true;
   }
 }
 

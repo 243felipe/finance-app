@@ -15,6 +15,7 @@
           (click)="excluir()"
           [disabled]="!selecionado || selecionado.length === 0"
         ></button>
+        <button pButton type="button" label="Atualizar" icon="pi pi-refresh" class="btn-primary" (click)="carregar()"></button>
       </div>
     </div>
   </div>

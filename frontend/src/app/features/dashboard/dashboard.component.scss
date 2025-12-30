@@ -277,23 +277,63 @@ $surface: #120b80;
 }
 
 .notifications {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  .notifications-scroll {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 400px;
+    padding-right: 0.5rem;
+    margin-top: 0.5rem;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
+
+    .no-data {
+      text-align: center;
+      color: rgba(13, 6, 100, 0.5);
+      font-size: 0.85rem;
+      padding: 1rem;
+      margin: 0;
+    }
+  }
+
   .notif {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.65rem;
+    display: flex;
     align-items: center;
-    padding: 0.65rem;
-    border-radius: 10px;
+    gap: 0.5rem;
+    padding: 0.5rem 0.4rem;
+    border-radius: 6px;
     border: 1px solid var(--neutral-200);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     box-shadow: var(--shadow-xs);
+    font-size: 0.85rem;
+    min-height: 32px;
   }
 
   .dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: #3418e8;
+    flex-shrink: 0;
 
     &.warn {
       background: #f59e0b;
@@ -304,14 +344,28 @@ $surface: #120b80;
   }
 
   .title {
-    margin: 0;
-    font-weight: 600;
+    flex: 1;
+    font-weight: 500;
     color: #0d0664;
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
   }
 
   .time {
-    margin: 0.1rem 0 0;
     color: rgba(13, 6, 100, 0.6);
-    font-size: 0.9rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  .valor {
+    font-weight: 600;
+    color: #0d0664;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    margin: 0;
   }
 }

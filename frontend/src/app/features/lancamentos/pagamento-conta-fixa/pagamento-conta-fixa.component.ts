@@ -68,7 +68,7 @@ export class PagamentoContaFixaComponent implements OnInit {
     return this.itens.filter((i) => i.descricao.toLowerCase().includes(f));
   }
 
-  private carregar(): void {
+  carregar(): void {
     this.loading = true;
     forkJoin([this.service.list(), this.categoriaService.list(), this.formaService.list(), this.contaService.list()] as const).subscribe({
       next: ([lanc, cats, formas, contas]) => {

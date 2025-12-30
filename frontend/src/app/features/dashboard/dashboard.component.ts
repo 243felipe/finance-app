@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { ChartModule } from 'primeng/chart';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ButtonModule } from 'primeng/button';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { FixedAccountService } from '../../services/fixed-account.service';
-import { LancamentoFinanceiroService } from '../../services/lancamento-financeiro.service';
 import { AuthService } from '../../core/auth.service';
+import { DashboardService, DashboardCards, DashboardCharts, LancamentoSaida } from '../../services/dashboard.service';
 
 type StatCard = {
   label: string;
@@ -25,6 +24,7 @@ type ProgressItem = {
 type Notification = {
   title: string;
   time: string;
+  valor?: string;
   type?: 'info' | 'warn' | 'error';
 };
 
@@ -38,42 +38,34 @@ type Notification = {
 export class DashboardComponent implements OnInit, OnDestroy {
   saudacao = '';
   cards: StatCard[] = [
-    { label: 'Pagto Conta Fixa (mês)', value: 'R$ 0,00', change: '', icon: 'pi pi-calendar' },
+    { label: 'Total Entradas (mês)', value: 'R$ 0,00', change: '', icon: 'pi pi-arrow-up' },
+    { label: 'Total Saídas (mês)', value: 'R$ 0,00', change: '', icon: 'pi pi-arrow-down' },
+    { label: 'Recorrentes - Entradas', value: 'R$ 0,00', change: '', icon: 'pi pi-refresh' },
     { label: 'Contas Fixas', value: 'R$ 0,00', change: '', icon: 'pi pi-wallet' },
-    { label: 'Métricas A/B', value: '312', change: '+3,1%', icon: 'pi pi-chart-bar' },
-    { label: 'Alertas', value: '12', change: '-1,0%', icon: 'pi pi-exclamation-triangle' },
-    { label: 'Clientes', value: '1.240', change: '+0,8%', icon: 'pi pi-users' }
+    { label: 'Pagto Conta Fixa (mês)', value: 'R$ 0,00', change: '', icon: 'pi pi-calendar' }
   ];
 
-  progress: ProgressItem[] = [
-    { label: 'Processo Norte', value: 78 },
-    { label: 'Processo Sul', value: 62 },
-    { label: 'Processo Leste', value: 54 }
-  ];
+  progress: ProgressItem[] = [];
 
-  notifications: Notification[] = [
-    { title: 'Backup concluído com sucesso', time: 'há 5 min', type: 'info' },
-    { title: 'Novo acesso administrador', time: 'há 12 min', type: 'warn' },
-    { title: 'Fila de importação finalizada', time: 'há 25 min', type: 'info' }
-  ];
+  notifications: Notification[] = [];
 
-  lineData: any;
-  lineOptions: any;
-  pieData: any;
-  pieOptions: any;
-  barSmallData: any;
-  barSmallOptions: any;
-  doughnutData: any;
-  doughnutOptions: any;
+  lineData: any = null;
+  lineOptions: any = null;
+  pieData: any = null;
+  pieOptions: any = null;
+  barSmallData: any = null;
+  barSmallOptions: any = null;
+  doughnutData: any = null;
+  doughnutOptions: any = null;
+
+  loading = false;
 
   private routerSubscription?: Subscription;
 
   constructor(
-    private fixedAccountService: FixedAccountService,
-    private lancamentoService: LancamentoFinanceiroService,
+    private dashboardService: DashboardService,
     private authService: AuthService,
-    private router: Router,
-    private activatedRoute: ActivatedRoute
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -84,7 +76,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event) => {
         const navigationEnd = event as NavigationEnd;
-        // Se a rota atual é o dashboard, recarrega os dados
         if (navigationEnd.urlAfterRedirects === '/dashboard') {
           this.carregarDados();
         }
@@ -97,90 +88,136 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private carregarDados(): void {
     this.atualizarSaudacao();
-    this.carregarTotalPagamentosContaFixaMes();
-    this.carregarTotalContasFixas();
-    // Setup dos charts só precisa ser feito uma vez
-    if (!this.lineData) {
-      this.setupCharts();
-    }
-  }
-
-  private carregarTotalContasFixas(): void {
-    this.fixedAccountService.total().subscribe({
-      next: (res) => {
-        const total = res.total ?? 0;
-        this.cards = [
-          this.cards[0],
-          { label: 'Contas Fixas', value: this.formatCurrency(total), change: '', icon: 'pi pi-wallet' },
-          ...this.cards.slice(2)
-        ];
+    this.loading = true;
+    
+    // Carrega cards e gráficos em paralelo
+    this.dashboardService.getCards().subscribe({
+      next: (cardsData) => {
+        this.atualizarCards(cardsData);
+        this.loading = false;
       },
       error: (err) => {
-        console.error('Erro ao buscar total de contas fixas', err);
+        console.error('Erro ao carregar cards do dashboard', err);
+        this.loading = false;
+      }
+    });
+
+    this.dashboardService.getCharts().subscribe({
+      next: (chartsData) => {
+        this.setupCharts(chartsData);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar gráficos do dashboard', err);
+      }
+    });
+
+    this.dashboardService.getLancamentosSaidasMes().subscribe({
+      next: (lancamentos) => {
+        this.carregarNotificacoes(lancamentos);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar lançamentos de saída', err);
       }
     });
   }
 
-  private carregarTotalPagamentosContaFixaMes(): void {
-    this.lancamentoService.list().subscribe({
-      next: (lancs) => {
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-        const total = (lancs || [])
-          .filter(
-            (l) =>
-              l.tipo === 'S' &&
-              l.idContaFixa !== null &&
-              l.idContaFixa !== undefined &&
-              (() => {
-                const d = new Date(l.dataLancamento);
-                return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-              })()
-          )
-          .reduce((sum, l) => sum + (l.valor || 0), 0);
+  private carregarNotificacoes(lancamentos: LancamentoSaida[]): void {
+    this.notifications = lancamentos.map((l) => {
+      const data = new Date(l.dataLancamento);
+      const hoje = new Date();
+      const diffMs = hoje.getTime() - data.getTime();
+      const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const diffHoras = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffMinutos = Math.floor(diffMs / (1000 * 60));
 
-        this.cards = [
-          { label: 'Pagto Conta Fixa (mês)', value: this.formatCurrency(total), change: '', icon: 'pi pi-calendar' },
-          ...this.cards.slice(1)
-        ];
-      },
-      error: (err) => {
-        console.error('Erro ao buscar pagamentos de conta fixa do mês', err);
+      let tempoTexto = '';
+      if (diffDias > 0) {
+        tempoTexto = diffDias === 1 ? 'há 1 dia' : `há ${diffDias} dias`;
+      } else if (diffHoras > 0) {
+        tempoTexto = diffHoras === 1 ? 'há 1 hora' : `há ${diffHoras} horas`;
+      } else if (diffMinutos > 0) {
+        tempoTexto = diffMinutos === 1 ? 'há 1 min' : `há ${diffMinutos} min`;
+      } else {
+        tempoTexto = 'agora';
       }
+
+      return {
+        title: l.descricao,
+        time: tempoTexto,
+        valor: this.formatCurrency(l.valor),
+        type: 'info' as const
+      };
     });
+  }
+
+  private atualizarCards(data: DashboardCards): void {
+    this.cards = [
+      { 
+        label: 'Total Entradas (mês)', 
+        value: this.formatCurrency(data.totalEntradasMes), 
+        change: '', 
+        icon: 'pi pi-arrow-up' 
+      },
+      { 
+        label: 'Total Saídas (mês)', 
+        value: this.formatCurrency(data.totalSaidasMes), 
+        change: '', 
+        icon: 'pi pi-arrow-down' 
+      },
+      { 
+        label: 'Recorrentes - Entradas', 
+        value: this.formatCurrency(data.totalRecorrentesEntradas), 
+        change: '', 
+        icon: 'pi pi-refresh' 
+      },
+      { 
+        label: 'Contas Fixas', 
+        value: this.formatCurrency(data.totalContasFixas), 
+        change: '', 
+        icon: 'pi pi-wallet' 
+      },
+      { 
+        label: 'Pagto Conta Fixa (mês)', 
+        value: this.formatCurrency(data.totalPagamentosContaFixaMes), 
+        change: '', 
+        icon: 'pi pi-calendar' 
+      }
+    ];
   }
 
   private formatCurrency(value: number): string {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   }
 
-  private setupCharts(): void {
+  private setupCharts(data: DashboardCharts): void {
     const textColor = '#0d0664';
     const gridColor = 'rgba(13,6,100,0.12)';
 
-    this.lineData = {
-      labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-      datasets: [
-        {
-          label: 'Métrica A',
-          data: [42, 58, 64, 72, 69, 84],
-          fill: true,
-          borderColor: '#3418e8',
-          tension: 0.35,
-          backgroundColor: 'rgba(52,24,232,0.18)',
-          pointRadius: 3
-        },
-        {
-          label: 'Métrica B',
-          data: [36, 44, 52, 61, 63, 70],
-          fill: false,
-          borderColor: '#0d0664',
-          tension: 0.35,
-          pointRadius: 3
-        }
-      ]
-    };
+    // Gráfico de Linha - Evolução Mensal
+    if (data.evolucaoMensal && data.evolucaoMensal.labels) {
+      this.lineData = {
+        labels: data.evolucaoMensal.labels,
+        datasets: [
+          {
+            label: 'Entradas',
+            data: data.evolucaoMensal.entradas || [],
+            fill: true,
+            borderColor: '#3418e8',
+            tension: 0.35,
+            backgroundColor: 'rgba(52,24,232,0.18)',
+            pointRadius: 3
+          },
+          {
+            label: 'Saídas',
+            data: data.evolucaoMensal.saidas || [],
+            fill: false,
+            borderColor: '#0d0664',
+            tension: 0.35,
+            pointRadius: 3
+          }
+        ]
+      };
+    }
 
     this.lineOptions = {
       maintainAspectRatio: false,
@@ -202,12 +239,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     };
 
+    // Gráfico de Pizza - Distribuição por Categoria
+    const pieLabels = data.distribuicaoCategorias.labels.length > 0 
+      ? data.distribuicaoCategorias.labels 
+      : ['Sem dados'];
+    const pieValues = data.distribuicaoCategorias.values.length > 0 
+      ? data.distribuicaoCategorias.values 
+      : [1];
+
     this.pieData = {
-      labels: ['Norte', 'Sul', 'Leste', 'Oeste'],
+      labels: pieLabels,
       datasets: [
         {
-          data: [34, 26, 22, 18],
-          backgroundColor: ['#3418e8', '#5f4ae3', '#8974ff', '#b4a7ff'],
+          data: pieValues,
+          backgroundColor: ['#3418e8', '#5f4ae3', '#8974ff', '#b4a7ff', '#d4c9ff', '#e8dfff'],
           hoverOffset: 8
         }
       ]
@@ -219,13 +264,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     };
 
-    this.barSmallData = {
-      labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-      datasets: [
-        { label: 'Receita', backgroundColor: '#3418e8', data: [32, 44, 58, 66, 68, 80] },
-        { label: 'Despesa', backgroundColor: '#8b5cf6', data: [28, 36, 47, 55, 57, 62] }
-      ]
-    };
+    // Gráfico de Barras - Receita x Despesa
+    if (data.receitaDespesa && data.receitaDespesa.labels) {
+      this.barSmallData = {
+        labels: data.receitaDespesa.labels,
+        datasets: [
+          { 
+            label: 'Receita', 
+            backgroundColor: '#3418e8', 
+            data: data.receitaDespesa.receita || []
+          },
+          { 
+            label: 'Despesa', 
+            backgroundColor: '#8b5cf6', 
+            data: data.receitaDespesa.despesa || []
+          }
+        ]
+      };
+    }
+    
     this.barSmallOptions = {
       maintainAspectRatio: false,
       plugins: {
@@ -237,16 +294,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     };
 
+    // Gráfico Doughnut - Mesma distribuição de categorias
     this.doughnutData = {
-      labels: ['Serviços', 'Produtos', 'Consultoria', 'Outros'],
+      labels: pieLabels,
       datasets: [
         {
-          data: [45, 25, 18, 12],
-          backgroundColor: ['#3418e8', '#5f4ae3', '#8974ff', '#b4a7ff'],
+          data: pieValues,
+          backgroundColor: ['#3418e8', '#5f4ae3', '#8974ff', '#b4a7ff', '#d4c9ff', '#e8dfff'],
           borderWidth: 1
         }
       ]
     };
+    
     this.doughnutOptions = {
       cutout: '60%',
       plugins: {

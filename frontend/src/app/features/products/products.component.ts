@@ -109,5 +109,10 @@ export class ProductsComponent {
     this.itens = this.itens.filter((i) => !this.selecionado.includes(i));
     this.selecionado = [];
   }
+
+  carregar(): void {
+    // Recarrega os dados (para componentes com dados estáticos, apenas limpa o filtro)
+    this.filtroDescricao = '';
+  }
 }
 

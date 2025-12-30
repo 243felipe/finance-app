@@ -33,6 +33,7 @@ import { FormaPagamento } from '../../../models/forma-pagamento';
 export class LancamentoMercadoComponent implements OnInit {
   filtro = '';
   dialogVisible = false;
+  ajudaDialogVisible = false;
   saving = false;
   loading = false;
   editingId: number | null = null;
@@ -115,10 +116,6 @@ export class LancamentoMercadoComponent implements OnInit {
     });
   }
 
-
-  pesquisar(): void {
-    // Filtro feito via getter
-  }
 
   abrirModal(): void {
     if (!this.listaSelecionadaId) {
@@ -205,5 +202,9 @@ export class LancamentoMercadoComponent implements OnInit {
 
   formatCurrency(value: number): string {
     return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  abrirModalAjuda(): void {
+    this.ajudaDialogVisible = true;
   }
 }

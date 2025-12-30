@@ -1,0 +1,262 @@
+<section class="card-surface recorrentes-card">
+  <div class="search-bar">
+    <label for="filtro">Recorrentes - Entradas</label>
+    <div class="search-row">
+      <input id="filtro" type="text" pInputText [(ngModel)]="filtro" placeholder="Buscar por descrição" />
+      <div class="actions">
+        <button pButton type="button" label="Cadastrar" icon="pi pi-plus" class="btn-primary" (click)="abrirModal()"></button>
+        <button
+          pButton
+          type="button"
+          label="Editar"
+          icon="pi pi-pencil"
+          class="btn-primary"
+          (click)="editar()"
+          [disabled]="!selecionado || selecionado.length !== 1"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Excluir"
+          icon="pi pi-trash"
+          class="btn-danger"
+          (click)="excluir()"
+          [disabled]="!selecionado || selecionado.length === 0"
+        ></button>
+        <button pButton type="button" label="Atualizar" icon="pi pi-refresh" class="btn-primary" (click)="carregar()"></button>
+        <button pButton type="button" icon="pi pi-info-circle" class="btn-info" (click)="abrirModalAjuda()" title="Ajuda"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-scroll">
+    <p-table
+      [value]="itensFiltrados"
+      dataKey="idRecorrente"
+      responsiveLayout="scroll"
+      selectionMode="multiple"
+      [(selection)]="selecionado"
+      [loading]="loading"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 48px"></th>
+          <th>Descrição</th>
+          <th>Categoria</th>
+          <th>Valor</th>
+          <th>Periodicidade</th>
+          <th>Dia Execução</th>
+          <th>Data Início</th>
+          <th>Data Fim</th>
+          <th>Status</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-item>
+        <tr [pSelectableRow]="item">
+          <td>
+            <p-tableCheckbox [value]="item"></p-tableCheckbox>
+          </td>
+          <td>{{ item.descricao || '-' }}</td>
+          <td>{{ getCategoriaNome(item.idCategoria) }}</td>
+          <td>{{ formatarValor(item.valor) }}</td>
+          <td>{{ formatarPeriodicidade(item.periodicidade) }}</td>
+          <td>{{ item.diaExecucao }}</td>
+          <td>{{ formatarData(item.dataInicio) }}</td>
+          <td>{{ formatarData(item.dataFim) }}</td>
+          <td>
+            <span [class]="item.ativo ? 'status-active' : 'status-inactive'">
+              {{ formatarStatus(item.ativo) }}
+            </span>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="empty-message">Nenhum lançamento recorrente de entrada encontrado.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>
+
+<p-dialog
+  [header]="editingId ? 'Editar Lançamento Recorrente' : 'Cadastrar Lançamento Recorrente'"
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{ width: '720px' }"
+  [closable]="false"
+>
+  <form [formGroup]="form" class="dialog-form">
+    <div class="field">
+      <label for="descricao">Descrição *</label>
+      <input id="descricao" type="text" pInputText formControlName="descricao" placeholder="Ex: Salário Mensal" />
+      <small *ngIf="form.get('descricao')?.invalid && form.get('descricao')?.touched" class="error">
+        Descrição é obrigatória (mínimo 3 caracteres).
+      </small>
+    </div>
+
+    <div class="two-cols">
+      <div class="field">
+        <label for="valor">Valor *</label>
+        <input id="valor" type="number" pInputText formControlName="valor" step="0.01" min="0.01" placeholder="0.00" />
+        <small *ngIf="form.get('valor')?.invalid && form.get('valor')?.touched" class="error">
+          Valor é obrigatório e deve ser maior que zero.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="idCategoria">Categoria *</label>
+        <select
+          id="idCategoria"
+          formControlName="idCategoria"
+          class="p-inputtext p-component"
+        >
+          <option [ngValue]="null" disabled>Selecione uma categoria</option>
+          <option *ngFor="let cat of categorias" [ngValue]="cat.id">
+            {{ cat.nome }}
+          </option>
+        </select>
+        <small *ngIf="form.get('idCategoria')?.invalid && form.get('idCategoria')?.touched" class="error">
+          Selecione uma categoria.
+        </small>
+      </div>
+    </div>
+
+    <div class="two-cols">
+      <div class="field">
+        <label for="idFonteRenda">Fonte de Renda (opcional)</label>
+        <select
+          id="idFonteRenda"
+          formControlName="idFonteRenda"
+          class="p-inputtext p-component"
+        >
+          <option [ngValue]="null">Nenhuma</option>
+          <option *ngFor="let fonte of fontesRenda" [ngValue]="fonte.id">
+            {{ fonte.nome }}
+          </option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="idFormaPagamento">Forma de Pagamento (opcional)</label>
+        <select
+          id="idFormaPagamento"
+          formControlName="idFormaPagamento"
+          class="p-inputtext p-component"
+        >
+          <option [ngValue]="null">Nenhuma</option>
+          <option *ngFor="let forma of formasPagamento" [ngValue]="forma.id">
+            {{ forma.nome }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="two-cols">
+      <div class="field">
+        <label for="periodicidade">Periodicidade *</label>
+        <select
+          id="periodicidade"
+          formControlName="periodicidade"
+          class="p-inputtext p-component"
+        >
+          <option value="MENSAL">Mensal</option>
+          <option value="ANUAL">Anual</option>
+        </select>
+        <small *ngIf="form.get('periodicidade')?.invalid && form.get('periodicidade')?.touched" class="error">
+          Selecione a periodicidade.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="diaExecucao">Dia de Execução *</label>
+        <input id="diaExecucao" type="number" pInputText formControlName="diaExecucao" min="1" max="31" placeholder="1-31" />
+        <small *ngIf="form.get('diaExecucao')?.invalid && form.get('diaExecucao')?.touched" class="error">
+          Dia deve estar entre 1 e 31.
+        </small>
+      </div>
+    </div>
+
+    <div class="two-cols">
+      <div class="field">
+        <label for="dataInicio">Data Início *</label>
+        <input id="dataInicio" type="date" pInputText formControlName="dataInicio" />
+        <small *ngIf="form.get('dataInicio')?.invalid && form.get('dataInicio')?.touched" class="error">
+          Informe a data de início.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="dataFim">Data Fim (opcional)</label>
+        <input id="dataFim" type="date" pInputText formControlName="dataFim" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="observacao">Observação (opcional)</label>
+      <input id="observacao" type="text" pInputText formControlName="observacao" placeholder="Observações adicionais" />
+    </div>
+
+    <div class="field">
+      <label for="ativo">Status *</label>
+      <select
+        id="ativo"
+        formControlName="ativo"
+        class="p-inputtext p-component"
+      >
+        <option [ngValue]="true">Ativo</option>
+        <option [ngValue]="false">Inativo</option>
+      </select>
+      <small *ngIf="form.get('ativo')?.invalid && form.get('ativo')?.touched" class="error">
+        Selecione o status.
+      </small>
+    </div>
+
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="dialogVisible = false"></button>
+      <button pButton type="button" label="Salvar" [loading]="saving" (click)="salvar()" autofocus></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog 
+  header="🟢 TELA: RECORRENTES – ENTRADAS" 
+  [(visible)]="ajudaDialogVisible" 
+  [modal]="true" 
+  [style]="{ width: '850px' }"
+  [closable]="true"
+>
+  <div class="ajuda-content">
+    <div class="ajuda-coluna">
+      <div class="ajuda-section">
+        <h3>📌 Explicação da tela</h3>
+        <p>Aqui você cadastra entradas recorrentes, ou seja, valores que você recebe com frequência.</p>
+        <p>Esses valores não entram automaticamente no saldo. Eles servem apenas como previsão ou modelo de lançamento.</p>
+      </div>
+
+      <div class="ajuda-section">
+        <p><strong>📌 Enquanto não virar lançamento, não impacta o saldo.</strong></p>
+      </div>
+    </div>
+
+    <div class="ajuda-coluna">
+      <div class="ajuda-section">
+        <h3>⚙️ O que essa tela influencia</h3>
+        <ul>
+          <li>Previsão de ganhos mensais</li>
+          <li>Geração de lançamentos automáticos</li>
+          <li>Planejamento financeiro</li>
+        </ul>
+      </div>
+
+      <div class="ajuda-section">
+        <h3>🧠 Exemplo prático</h3>
+        <ul>
+          <li>Salário mensal</li>
+          <li>Aluguel recebido</li>
+          <li>Pensão</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</p-dialog>

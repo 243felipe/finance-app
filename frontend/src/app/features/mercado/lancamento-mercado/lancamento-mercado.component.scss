@@ -44,9 +44,14 @@
     .actions {
       display: flex;
       gap: 0.5rem;
+      flex-wrap: wrap;
+      flex: 1;
+      justify-content: flex-end;
 
       button {
         min-height: 42px;
+        flex: 0 0 auto;
+        min-width: 100px;
       }
 
       .btn-ghost {
@@ -79,6 +84,25 @@
       .btn-danger:hover {
         background: #dc2626;
         border-color: #dc2626;
+      }
+
+      .btn-info {
+        background: #3b82f6;
+        border: 1px solid #3b82f6;
+        color: #ffffff;
+        min-width: 42px;
+        width: 42px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: auto;
+        flex: 0 0 auto;
+      }
+
+      .btn-info:hover {
+        background: #2563eb;
+        border-color: #2563eb;
       }
     }
   }
@@ -128,6 +152,27 @@
   overflow: auto;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
+
+  // Scrollbar customizado com cores claras
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
+    border: 1px solid #f8fafc;
+
+    &:hover {
+      background: #cbd5e1;
+    }
+  }
 }
 
 :host ::ng-deep .p-datatable-wrapper {
@@ -142,6 +187,27 @@
 
 :host ::ng-deep .p-datatable-scrollable-body {
   overflow-y: auto;
+
+  // Scrollbar customizado com cores claras
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
+    border: 1px solid #f8fafc;
+
+    &:hover {
+      background: #cbd5e1;
+    }
+  }
 }
 
 :host ::ng-deep .p-dialog-mask {
@@ -162,11 +228,113 @@
   .p-dialog-content {
     background: #f8fafc;
     padding: 1.25rem;
+    overflow-y: auto;
+
+    // Scrollbar customizado com cores claras para modal de ajuda
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f8fafc;
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 4px;
+      border: 1px solid #f8fafc;
+
+      &:hover {
+        background: #cbd5e1;
+      }
+    }
   }
 
   .p-dialog-footer {
     background: #f8fafc;
     padding: 0 1.25rem 1.25rem;
+  }
+}
+
+.ajuda-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  color: #0d0664;
+  font-size: 0.875rem;
+
+  .ajuda-coluna {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .ajuda-section {
+    h3 {
+      margin: 0 0 0.5rem 0;
+      color: #0d0664;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 0.35rem 0;
+      line-height: 1.5;
+      color: rgba(13, 6, 100, 0.8);
+      font-size: 0.875rem;
+    }
+
+    ul {
+      margin: 0.35rem 0;
+      padding-left: 1.25rem;
+      line-height: 1.6;
+
+      li {
+        margin: 0.2rem 0;
+        color: rgba(13, 6, 100, 0.8);
+        font-size: 0.875rem;
+      }
+    }
+
+    strong {
+      color: #0d0664;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+  }
+
+  .exemplo-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+
+    p {
+      margin: 0 0 0.4rem 0;
+      font-weight: 600;
+      color: #0d0664;
+      font-size: 0.875rem;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      line-height: 1.5;
+
+      li {
+        font-size: 0.875rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .ajuda-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
 

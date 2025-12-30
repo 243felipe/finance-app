@@ -24,6 +24,7 @@ import { FormaPagamento } from '../../../models/forma-pagamento';
 export class DespesaContasDiaComponent implements OnInit {
   filtro = '';
   dialogVisible = false;
+  ajudaDialogVisible = false;
   saving = false;
   loading = false;
   editingId: number | null = null;
@@ -63,7 +64,7 @@ export class DespesaContasDiaComponent implements OnInit {
     return this.itens.filter((i) => i.descricao.toLowerCase().includes(f));
   }
 
-  private carregar(): void {
+  carregar(): void {
     this.loading = true;
     forkJoin([this.service.list(), this.categoriaService.list(), this.formaService.list()] as const).subscribe({
       next: ([lanc, cats, formas]) => {
@@ -80,10 +81,6 @@ export class DespesaContasDiaComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
-
-  pesquisar(): void {
-    // filtro via getter
   }
 
   abrirModal(): void {
@@ -194,6 +191,10 @@ export class DespesaContasDiaComponent implements OnInit {
 
   private formatCurrency(num: number): string {
     return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  abrirModalAjuda(): void {
+    this.ajudaDialogVisible = true;
   }
 }
 

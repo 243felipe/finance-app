@@ -20,6 +20,7 @@ import { FormaPagamentoService } from '../../../services/forma-pagamento.service
 export class FormasPagamentoComponent implements OnInit {
   filtro = '';
   dialogVisible = false;
+  ajudaDialogVisible = false;
   saving = false;
   loading = false;
   editingId: number | null = null;
@@ -73,10 +74,6 @@ export class FormasPagamentoComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
-
-  pesquisar(): void {
-    // Filtro via getter; mantido para semântica/ações futuras.
   }
 
   abrirModal(): void {
@@ -143,6 +140,10 @@ export class FormasPagamentoComponent implements OnInit {
         this.saving = false;
       }
     });
+  }
+
+  abrirModalAjuda(): void {
+    this.ajudaDialogVisible = true;
   }
 }
 

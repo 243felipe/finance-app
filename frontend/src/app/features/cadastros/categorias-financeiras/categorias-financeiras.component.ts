@@ -35,6 +35,7 @@ import { FinancialCategoryService } from '../../../services/financial-category.s
 export class CategoriasFinanceirasComponent implements OnInit {
   filtro = '';
   dialogVisible = false;
+  ajudaDialogVisible = false;
   saving = false;
   loading = false;
   editingId: number | null = null;
@@ -80,10 +81,6 @@ export class CategoriasFinanceirasComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
-
-  pesquisar(): void {
-    // Filtro feito via getter; mantido para semântica/ações futuras.
   }
 
   abrirModal(): void {
@@ -149,5 +146,9 @@ export class CategoriasFinanceirasComponent implements OnInit {
         this.saving = false;
       }
     });
+  }
+
+  abrirModalAjuda(): void {
+    this.ajudaDialogVisible = true;
   }
 }
