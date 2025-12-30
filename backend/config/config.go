@@ -65,4 +65,3 @@ func Load() Config {
 
 	return cfg
 }
-

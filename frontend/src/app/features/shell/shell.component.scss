@@ -36,7 +36,7 @@ $surface: #120b80;
   width: var(--sidebar);
   height: auto;
   min-height: 100vh;
-  padding: 1.5rem 1.25rem;
+  padding: 1rem 1.25rem 1.5rem;
   background: color.scale($bg, $lightness: -2%);
   border-right: 1px solid var(--neutral-200);
   box-shadow: var(--shadow-sm);
@@ -44,27 +44,107 @@ $surface: #120b80;
   flex-direction: column;
   gap: 1.25rem;
   transition: width 0.2s ease, padding 0.2s ease;
-  overflow: hidden;
 
   &.collapsed {
     width: 72px;
     padding: 1.25rem 0.75rem;
-    align-items: center;
 
     .title,
     .menu span,
     .sidebar-footer button span {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .brand {
+      justify-content: center;
+      margin: 0;
+    }
+
+    .menu {
+      align-items: center;
+      margin-top: 1rem;
+      width: 100%;
+    }
+
+    .menu a,
+    .menu .parent-row {
+      justify-content: center !important;
+      align-items: center !important;
+      padding: 0.6rem 0 !important;
+      width: 100%;
+      min-width: 0;
+      gap: 0 !important;
+      margin: 0;
+      transition: padding 0.35s cubic-bezier(0.4, 0, 0.2, 1), gap 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .menu a i,
+    .menu .parent-row > i:first-child {
+      font-size: 1.1rem;
+      margin: 0 auto !important;
+      padding: 0 !important;
+      display: block !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      transition: font-size 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+      text-align: center;
+      width: auto;
+    }
+
+    .menu .parent-row {
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    .menu .parent-row .chevron {
+      display: none !important;
+    }
+
+    .menu .parent-row span {
+      display: none !important;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .menu a span {
+      display: none !important;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .menu a.active,
+    .menu .parent-row.active {
+      justify-content: center !important;
+      align-items: center !important;
+      margin: 0;
+      width: 100%;
+      padding: 0.6rem 0 !important;
+    }
+
+    .menu a.active i,
+    .menu .parent-row.active > i:first-child {
+      margin: 0 auto !important;
+      padding: 0 !important;
+      display: block !important;
+    }
+
+    .menu .submenu {
       display: none;
     }
+  }
 
-    .menu a {
-      justify-content: center;
-      padding: 0.6rem 0.35rem;
-    }
-
-    .menu a i {
-      font-size: 1.1rem;
-      margin: 0;
+  &:not(.collapsed) {
+    .title,
+    .menu span,
+    .sidebar-footer button span {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.1s;
     }
 
     .brand-title,
@@ -78,9 +158,7 @@ $surface: #120b80;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem; // mantido conforme ajustes do usuário
-  flex-direction: column;
-  margin-top: 0;
+  gap: 0.75rem;
 
   .brand-logo {
     max-width: 160px;
@@ -88,30 +166,12 @@ $surface: #120b80;
     height: auto;
     object-fit: contain;
   }
-
-  .brand-title {
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 1.56rem;
-    letter-spacing: 0.01em;
-    text-align: center;
-    margin: 0;
-    line-height: 1.1;
-  }
-
-  .brand-divider {
-    width: 70%;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.45);
-    margin-top: 0.2rem;
-  }
 }
 
 .menu {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  margin-top: 1.4rem;
 
   a,
   .parent-row {
@@ -122,7 +182,7 @@ $surface: #120b80;
     border-radius: 12px;
     color: rgba(255, 255, 255, 0.85);
     text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease, padding 0.35s cubic-bezier(0.4, 0, 0.2, 1), gap 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background 0.2s ease, color 0.2s ease;
 
     &:hover,
     &.active {
@@ -132,8 +192,6 @@ $surface: #120b80;
 
     i {
       font-size: 1rem;
-      transition: font-size 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-      flex-shrink: 0;
     }
   }
 
@@ -141,6 +199,7 @@ $surface: #120b80;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    width: 100%;
 
     .parent-row {
       cursor: default;
@@ -162,7 +221,6 @@ $surface: #120b80;
       display: flex;
       flex-direction: column;
       gap: 0.2rem;
-      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
       a {
         padding-left: 2.5rem;
@@ -216,17 +274,6 @@ $surface: #120b80;
   overflow-y: hidden;
   position: relative;
   z-index: 10;
-}
-
-.logout-btn {
-  margin-left: auto;
-}
-
-.topbar-title {
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  flex-shrink: 0;
-  white-space: nowrap;
 }
 
 .user-menu-container {
@@ -300,111 +347,9 @@ $surface: #120b80;
   }
 }
 
-.tabs-container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 1;
-  overflow-x: auto;
-  overflow-y: hidden;
-  min-width: 0;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(13, 6, 100, 0.2) transparent;
-
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(13, 6, 100, 0.2);
-    border-radius: 2px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: rgba(13, 6, 100, 0.3);
-  }
-}
-
-.tab {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-  font-size: 0.875rem;
-  color: #0d0664;
-
-  &:hover {
-    background: #e2e8f0;
-    border-color: #cbd5e1;
-  }
-
-  &.active {
-    background: #3418e8;
-    border-color: #3418e8;
-    color: #ffffff;
-
-    .tab-icon {
-      color: #ffffff;
-    }
-
-    .tab-close {
-      color: #ffffff;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.2);
-      }
-    }
-  }
-
-  .tab-icon {
-    font-size: 0.875rem;
-    color: #0d0664;
-    flex-shrink: 0;
-  }
-
-  .tab-label {
-    font-weight: 500;
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .tab-close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    border: none;
-    background: transparent;
-    border-radius: 4px;
-    cursor: pointer;
-    padding: 0;
-    margin-left: 0.25rem;
-    color: #64748b;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-
-    &:hover {
-      background: rgba(13, 6, 100, 0.1);
-      color: #0d0664;
-    }
-
-    i {
-      font-size: 0.75rem;
-    }
-  }
+.topbar-title {
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .content {
@@ -565,113 +510,12 @@ $surface: #120b80;
   .shell {
     min-height: 100vh;
     --sidebar: 0px;
-    grid-template-columns: 1fr !important;
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  // Sidebar fora da tela quando fechado
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px !important;
-    max-width: 85vw;
-    height: 100vh;
-    z-index: 1000;
-    transform: translateX(-100%);
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 1rem 1.25rem 1.5rem !important;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    align-items: flex-start !important;
-    background: color.scale($bg, $lightness: -2%) !important;
-    visibility: hidden;
-    pointer-events: none;
-
-    .brand {
-      justify-content: flex-start !important;
-      margin: 0;
-    }
-
-    .menu {
-      align-items: flex-start !important;
-      width: 100%;
-    }
-
-    .menu a,
-    .menu .parent-row {
-      justify-content: flex-start !important;
-      align-items: center !important;
-      padding: 0.6rem 0 !important;
-      width: 100%;
-      gap: 0.75rem !important;
-    }
-
-    .menu a i,
-    .menu .parent-row > i:first-child {
-      margin: 0 !important;
-      display: block !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-
-    .menu .parent-row .chevron {
-      display: block !important;
-    }
-
-    .menu .parent-row span,
-    .menu a span {
-      display: inline !important;
-      width: auto !important;
-      height: auto !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-      overflow: visible !important;
-    }
-
-    .menu .submenu {
-      display: block !important;
-    }
-
-    // Mesmo quando collapsed, em mobile mostra tudo
-    &.collapsed {
-      width: 280px !important;
-      max-width: 85vw;
-      padding: 1rem 1.25rem 1.5rem !important;
-      align-items: flex-start !important;
-    }
-  }
-
-  // Quando drawer aberto
-  .shell.mobile-open {
-    .sidebar {
-      transform: translateX(0) !important;
-      visibility: visible !important;
-      pointer-events: auto;
-    }
-
-    .main {
-      overflow: hidden;
-      position: fixed;
-      width: 100%;
-      height: 100vh;
-    }
+    grid-template-columns: 1fr;
   }
 
   .main {
     grid-template-rows: auto 1fr;
-    padding-left: 0 !important;
-    margin-left: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    position: relative;
-    z-index: 1;
-    overflow-x: hidden;
+    padding-left: 0;
   }
 
   .topbar {

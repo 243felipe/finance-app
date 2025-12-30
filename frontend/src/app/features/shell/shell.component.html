@@ -1,11 +1,12 @@
-<div class="shell" [class.collapsed]="collapsed" [class.mobile-open]="!collapsed && isMobile">
-  <div class="sidebar-overlay" *ngIf="!collapsed && isMobile" (click)="toggle()"></div>
+<div class="shell" [class.collapsed]="collapsed">
   <aside class="sidebar" [class.collapsed]="collapsed">
     <div class="brand">
       <img src="/images/logo_unica_login.png" alt="Logo" class="brand-logo" />
       <div class="brand-title">Incret Finanças</div>
       <div class="brand-divider"></div>
     </div>
+
+    <h1 class="sidebar-title">Incret Finanças</h1>
 
     <nav class="menu">
       <ng-container *ngFor="let item of menu">
@@ -29,12 +30,7 @@
           </div>
         </div>
         <ng-template #singleLink>
-          <a
-            [routerLink]="item.route"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            (click)="onMenuClick()"
-          >
+          <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             <i [class]="item.icon"></i>
             <span>{{ item.label }}</span>
           </a>

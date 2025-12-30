@@ -38,34 +38,6 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
   @Input() title = 'Portal';
   collapsed = true; // inicia fechado
   expanded: Record<string, boolean> = {};
-  tabs: Tab[] = [];
-  private tabsSubscription?: Subscription;
-  isMobile = window.innerWidth <= 900;
-
-  // User menu
-  userMenuOpen = false;
-  dropdownPosition = { top: 0, right: 0 };
-  @ViewChild('userMenuContainer', { read: ElementRef }) userMenuContainer?: ElementRef<HTMLDivElement>;
-  @ViewChild('userBtn', { read: ElementRef }) userBtn?: ElementRef<HTMLButtonElement>;
-
-  // Profile modal
-  profileModalVisible = false;
-  profileName = '';
-  profileLogin = '';
-  profilePassword = '';
-  editingName = false;
-  editingLogin = false;
-  editingPassword = false;
-  savingName = false;
-  savingLogin = false;
-  savingPassword = false;
-
-  // Logout confirm modal
-  logoutConfirmModalVisible = false;
-
-  // Session timeout modal
-  sessionTimeoutWarningVisible = false;
-  private sessionTimeoutSubscription?: Subscription;
 
   @ViewChild('mainEl') mainEl?: ElementRef<HTMLDivElement>;
   @ViewChild('contentEl') contentEl?: ElementRef<HTMLElement>;
@@ -144,13 +116,6 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
       this.expanded = {};
     }
     requestAnimationFrame(() => this.logSizes('toggle'));
-  }
-
-  onMenuClick(): void {
-    // Fecha o drawer em mobile após clicar em um item do menu
-    if (this.isMobile && !this.collapsed) {
-      this.collapsed = true;
-    }
   }
 
   toggleParent(item: MenuItem): void {
