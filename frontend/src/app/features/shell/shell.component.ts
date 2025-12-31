@@ -9,6 +9,10 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
 import { TabsService, Tab } from '../../core/tabs.service';
 import { SessionTimeoutService } from '../../core/session-timeout.service';
+import { ListaComprasService } from '../../services/lista-compras.service';
+import { ItemListaComprasService } from '../../services/item-lista-compras.service';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 type MenuItem = {
   label: string;
@@ -29,7 +33,8 @@ type MenuItem = {
     RouterLinkActive,
     ButtonModule,
     DialogModule,
-    InputTextModule
+    InputTextModule,
+    ToastModule
   ],
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss']
@@ -62,6 +67,13 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
   sessionTimeoutWarningVisible = false;
   private sessionTimeoutSubscription?: Subscription;
   isMobile = window.innerWidth <= 900;
+  // Lista modal
+  listaModalVisible = false;
+  listaDescricao = '';
+  listaItems: Array<{ descricao: string; valor: number | null }> = [];
+  listaTotal = 0;
+  savingLista = false;
+  lastAddedItemIndex: number | null = null;
 
   @ViewChild('mainEl') mainEl?: ElementRef<HTMLDivElement>;
   @ViewChild('contentEl') contentEl?: ElementRef<HTMLElement>;
@@ -122,7 +134,10 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
     private auth: AuthService,
     private router: Router,
     private tabsService: TabsService,
-    private sessionTimeoutService: SessionTimeoutService
+    private sessionTimeoutService: SessionTimeoutService,
+    private listaComprasService: ListaComprasService,
+    private itemListaComprasService: ItemListaComprasService,
+    private messageService: MessageService
   ) {
     this.tabsSubscription = this.tabsService.tabs$.subscribe((tabs) => {
       this.tabs = tabs;
@@ -370,6 +385,102 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
 
   private updateIsMobile(): void {
     this.isMobile = window.innerWidth <= 900;
+  }
+
+  // Lista modal methods
+  openListaModal(): void {
+    this.listaModalVisible = true;
+    this.listaDescricao = '';
+    this.listaItems = [];
+    this.listaTotal = 0;
+  }
+
+  closeListaModal(): void {
+    this.listaModalVisible = false;
+    this.listaDescricao = '';
+    this.listaItems = [];
+    this.listaTotal = 0;
+  }
+
+  addItem(): void {
+    this.listaItems.push({ descricao: '', valor: null });
+    this.lastAddedItemIndex = this.listaItems.length - 1;
+    // Foca no input após o DOM ser atualizado
+    setTimeout(() => {
+      const inputId = `item-desc-${this.lastAddedItemIndex}`;
+      const inputElement = document.getElementById(inputId);
+      if (inputElement) {
+        // Scroll até o elemento para garantir que esteja visível
+        inputElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Foca no input
+        inputElement.focus();
+      }
+    }, 50);
+  }
+
+  removeItem(index: number): void {
+    this.listaItems.splice(index, 1);
+    this.updateTotal();
+  }
+
+  updateTotal(): void {
+    this.listaTotal = this.listaItems.reduce((sum, item) => {
+      const valor = item.valor || 0;
+      return sum + valor;
+    }, 0);
+  }
+
+  saveLista(): void {
+    if (!this.listaDescricao.trim() || this.listaItems.length === 0) {
+      return;
+    }
+
+    // Valida se todos os itens têm descrição e valor
+    const invalidItems = this.listaItems.filter(
+      item => !item.descricao.trim() || item.valor === null || item.valor <= 0
+    );
+
+    if (invalidItems.length > 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Atenção',
+        detail: 'Preencha todos os campos dos itens (nome e valor maior que zero)'
+      });
+      return;
+    }
+
+    this.savingLista = true;
+
+    // Prepara o payload
+    const payload = {
+      nome: this.listaDescricao.trim(),
+      itens: this.listaItems.map(item => ({
+        descricao: item.descricao.trim(),
+        valor: item.valor!
+      }))
+    };
+
+    // Cria a lista com os itens em uma única transação
+    this.listaComprasService.createComItens(payload).subscribe({
+      next: () => {
+        this.savingLista = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Lista de compras criada com sucesso!'
+        });
+        this.closeListaModal();
+      },
+      error: (err) => {
+        console.error('Erro ao criar lista:', err);
+        this.savingLista = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: err.error?.message || 'Erro ao criar a lista de compras'
+        });
+      }
+    });
   }
 }
 

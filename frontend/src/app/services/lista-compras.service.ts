@@ -32,4 +32,8 @@ export class ListaComprasService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  createComItens(payload: { nome: string; itens: Array<{ descricao: string; valor: number }> }): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/com-itens`, payload);
+  }
 }

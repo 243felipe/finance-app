@@ -342,9 +342,34 @@ $surface: #120b80;
   z-index: 10;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.lista-btn {
+  color: #ffffff !important;
+  background: #3418e8 !important;
+  border-radius: 6px !important;
+  padding: 0.5rem 1rem !important;
+  font-weight: 500;
+  font-size: 0.875rem;
+  border: none !important;
+  box-shadow: 0 2px 4px rgba(52, 24, 232, 0.3);
+
+  &:hover {
+    background: #2a12c4 !important;
+    box-shadow: 0 4px 8px rgba(52, 24, 232, 0.4);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+  }
+}
+
 .user-menu-container {
   position: relative;
-  margin-left: auto;
   flex-shrink: 0;
 
   .user-btn {
@@ -805,6 +830,181 @@ $surface: #120b80;
   }
   to {
     transform: translateX(-100%);
+  }
+}
+
+// Lista modal styles
+.lista-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  overflow: hidden;
+
+  .lista-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+
+    label {
+      font-weight: 600;
+      color: #0d0664;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 0.9375rem;
+
+      &:focus {
+        outline: none;
+        border-color: #3418e8;
+        box-shadow: 0 0 0 3px rgba(52, 24, 232, 0.1);
+      }
+    }
+  }
+
+  .lista-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+
+    .lista-items-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+
+      h4 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0d0664;
+      }
+    }
+
+    .lista-items-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 0.5rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      background: #f8fafc;
+      min-height: 0;
+
+      // Custom scrollbar
+      &::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+
+        &:hover {
+          background: #94a3b8;
+        }
+      }
+
+      .lista-item-row {
+        display: grid;
+        grid-template-columns: 1fr 150px 40px;
+        gap: 0.75rem;
+        align-items: center;
+        padding: 0.75rem;
+        background: #ffffff;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        flex-shrink: 0;
+
+        .item-input {
+          padding: 0.5rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 4px;
+          font-size: 0.875rem;
+
+          &:focus {
+            outline: none;
+            border-color: #3418e8;
+            box-shadow: 0 0 0 2px rgba(52, 24, 232, 0.1);
+          }
+        }
+
+        .item-valor {
+          text-align: right;
+        }
+      }
+
+      .no-items {
+        text-align: center;
+        color: #64748b;
+        padding: 2rem;
+        font-style: italic;
+      }
+    }
+  }
+
+  .lista-footer {
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    flex-shrink: 0;
+    margin-top: auto;
+
+    .lista-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .total-label {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #0d0664;
+      }
+
+      .total-value {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #3418e8;
+      }
+    }
+  }
+}
+
+.lista-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+// Estilos específicos para a modal de lista
+:host ::ng-deep .lista-modal-dialog {
+  .p-dialog-content {
+    height: 500px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 1.5rem !important;
+    overflow: hidden !important;
   }
 }
 
