@@ -7,11 +7,11 @@ $surface: #120b80;
 
 .shell {
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 230px 1fr;
   min-height: 100vh;
   background: #ffffff;
   overflow-x: hidden;
-  --sidebar: 200px;
+  --sidebar: 230px;
   transition: grid-template-columns 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
   &.collapsed {
@@ -1011,19 +1011,19 @@ $surface: #120b80;
 // Responsive - Tablet
 @media (min-width: 901px) and (max-width: 1200px) {
   .shell {
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: 210px 1fr;
 
     &.collapsed {
-      grid-template-columns: 72px 1fr;
+      grid-template-columns: 84px 1fr;
     }
   }
 
   .sidebar {
-    width: 200px;
+    width: 210px;
     padding: 1rem;
 
     &.collapsed {
-      width: 72px;
+      width: 84px;
       padding: 1.25rem 0.5rem;
     }
   }
