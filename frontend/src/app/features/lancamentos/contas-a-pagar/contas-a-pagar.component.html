@@ -1,0 +1,115 @@
+<section class="card-surface contas-pagar">
+  <header class="header">
+    <div>
+      <h2>Despesa / Conta a Pagar</h2>
+      <p class="subtitle">Registre despesas pagas ou em aberto (conta fixa ou avulsa).</p>
+    </div>
+    <button pButton type="button" icon="pi pi-refresh" label="Atualizar" (click)="carregar()" [disabled]="loading"></button>
+  </header>
+
+  <form [formGroup]="form" class="form-grid">
+    <div class="field">
+      <label for="descricao">Descrição</label>
+      <input id="descricao" type="text" pInputText formControlName="descricao" />
+    </div>
+
+    <div class="field">
+      <label for="idCategoria">Categoria</label>
+      <p-select
+        inputId="idCategoria"
+        [options]="categorias"
+        optionLabel="nome"
+        optionValue="id"
+        formControlName="idCategoria"
+        placeholder="Selecione"
+      ></p-select>
+    </div>
+
+    <div class="field">
+      <label for="valor">Valor</label>
+      <input id="valor" type="number" pInputText formControlName="valor" min="0" step="0.01" />
+    </div>
+
+    <div class="field">
+      <label for="dataVencimento">Data de vencimento</label>
+      <p-datepicker inputId="dataVencimento" formControlName="dataVencimento" dateFormat="dd/mm/yy"></p-datepicker>
+    </div>
+
+    <div class="field">
+      <label for="dataPagamento">Data de pagamento (opcional)</label>
+      <p-datepicker inputId="dataPagamento" formControlName="dataPagamento" dateFormat="dd/mm/yy"></p-datepicker>
+    </div>
+
+    <div class="field">
+      <label for="idFormaPagamento">Forma de pagamento</label>
+      <p-select
+        inputId="idFormaPagamento"
+        [options]="formasPagamento"
+        optionLabel="nome"
+        optionValue="id"
+        formControlName="idFormaPagamento"
+        placeholder="Selecione"
+      ></p-select>
+    </div>
+
+    <div class="field checkbox">
+      <p-checkbox inputId="isContaFixa" binary="true" formControlName="isContaFixa"></p-checkbox>
+      <label for="isContaFixa">É conta fixa?</label>
+    </div>
+
+    <div class="field" *ngIf="form.value.isContaFixa">
+      <label for="idContaFixa">Conta fixa</label>
+      <p-select
+        inputId="idContaFixa"
+        [options]="contasFixas"
+        optionLabel="nome"
+        optionValue="id"
+        formControlName="idContaFixa"
+        placeholder="Selecione"
+      ></p-select>
+    </div>
+
+    <div class="field full">
+      <label for="observacao">Observação</label>
+      <p-textarea id="observacao" rows="2" formControlName="observacao"></p-textarea>
+    </div>
+
+    <div class="actions">
+      <button pButton type="button" label="Salvar" icon="pi pi-check" (click)="salvar()" [loading]="saving"></button>
+    </div>
+  </form>
+
+  <p-table [value]="itens" dataKey="id" [loading]="loading" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Status</th>
+        <th>Descrição</th>
+        <th>Categoria</th>
+        <th>Valor</th>
+        <th>Vencimento</th>
+        <th>Pagamento</th>
+        <th>Forma</th>
+        <th>Conta Fixa</th>
+        <th>Observação</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-item>
+      <tr>
+        <td>
+          <span [class.badge]="true" [class.paga]="item.statusPagamento === 'PAGA'" [class.aberto]="item.statusPagamento === 'EM ABERTO'">
+            {{ item.statusPagamento }}
+          </span>
+        </td>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.categoria }}</td>
+        <td>{{ item.valor | currency: 'BRL' }}</td>
+        <td>{{ item.dataVencimento | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ item.dataPagamento | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ item.formaPagamento || '-' }}</td>
+        <td>{{ item.contaFixa || '-' }}</td>
+        <td>{{ item.observacao || '-' }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</section>
+

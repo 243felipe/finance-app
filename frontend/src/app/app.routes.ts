@@ -65,6 +65,12 @@ export const routes: Routes = [
     data: { title: 'Lançar Despesa - Contas do Dia' }
       },
       {
+        path: 'lancamentos/despesa/contas-a-pagar',
+        loadComponent: () =>
+          import('./features/lancamentos/contas-a-pagar/contas-a-pagar.component').then((c) => c.ContasAPagarComponent),
+        data: { title: 'Despesa / Conta a Pagar' }
+      },
+      {
         path: 'lancamentos/despesa/despesas-extras',
     loadComponent: () =>
       import('./features/lancamentos/despesa-extra/despesa-extra.component').then((c) => c.DespesaExtraComponent),

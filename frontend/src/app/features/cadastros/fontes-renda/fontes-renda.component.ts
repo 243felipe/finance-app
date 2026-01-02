@@ -6,6 +6,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { MessageService } from 'primeng/api';
 
 import { FonteRenda } from '../../../models/fonte-renda';
 import { FonteRendaService } from '../../../services/fonte-renda.service';
@@ -29,7 +30,11 @@ export class FontesRendaComponent implements OnInit {
 
   form!: FormGroup;
 
-  constructor(private fb: FormBuilder, private service: FonteRendaService) {
+  constructor(
+    private fb: FormBuilder,
+    private service: FonteRendaService,
+    private messageService: MessageService
+  ) {
     this.form = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
       descricao: [''],
@@ -128,6 +133,22 @@ export class FontesRendaComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao excluir fontes de renda', err);
+        const backendMsg = (err?.error?.message as string) || (typeof err?.error === 'string' ? err.error : 'Erro ao excluir fonte de renda.');
+        const detail = `${backendMsg}
+Esta fonte de renda está sendo usada em
+lançamentos financeiros.
+
+telas:
+ - Tela de Receita,
+ - Tela de Despesas
+ - Tela de Recorrentes
+
+Ajuste ou remova esses lançamentos antes de excluir essa renda.`;
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Exclusão não realizada',
+          detail
+        });
         this.saving = false;
       }
     });

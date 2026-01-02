@@ -5,6 +5,8 @@ import "time"
 type LancamentoFinanceiro struct {
 	ID                 int64      `json:"id"`
 	DataLancamento     time.Time  `json:"dataLancamento"`
+	DataVencimento     *time.Time `json:"dataVencimento,omitempty"`
+	DataPagamento      *time.Time `json:"dataPagamento,omitempty"`
 	Descricao          string     `json:"descricao"`
 	Tipo               string     `json:"tipo"`
 	Valor              float64    `json:"valor"`
@@ -19,4 +21,5 @@ type LancamentoFinanceiro struct {
 	FonteRendaNome     string     `json:"fonteRenda,omitempty"`
 	ContaFixaNome      string     `json:"contaFixa,omitempty"`
 	FormaPagamentoNome string     `json:"formaPagamento,omitempty"`
+	StatusPagamento    string     `json:"statusPagamento,omitempty"`
 }

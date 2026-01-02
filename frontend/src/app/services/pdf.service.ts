@@ -178,7 +178,7 @@ export class PdfService {
 
     html += `
         <div class="footer">
-          <p>Incret Finanças - Sistema de Gestão Financeira</p>
+          <p>Alto da Colina - Sistema de Gestão Financeira</p>
         </div>
       </body>
       </html>

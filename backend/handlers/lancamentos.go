@@ -17,6 +17,8 @@ type LancamentoHandler struct {
 
 type lancamentoInput struct {
 	DataLancamento   string  `json:"dataLancamento" binding:"required"` // yyyy-MM-dd
+	DataVencimento   *string `json:"dataVencimento"`                    // opcional
+	DataPagamento    *string `json:"dataPagamento"`                     // opcional (paga se preenchida)
 	Descricao        string  `json:"descricao" binding:"required,min=3"`
 	Tipo             string  `json:"tipo" binding:"required,oneof=E S"`
 	Valor            float64 `json:"valor" binding:"required,gt=0"`
@@ -32,6 +34,8 @@ func (h *LancamentoHandler) List(c *gin.Context) {
 		SELECT 
 			lf.id_lancamento,
 			lf.data_lancamento,
+			lf.data_vencimento,
+			lf.data_pagamento,
 			lf.descricao,
 			lf.tipo,
 			lf.valor,
@@ -45,7 +49,8 @@ func (h *LancamentoHandler) List(c *gin.Context) {
 			c.nome AS categoria,
 			COALESCE(fr.nome, '') AS fonte_renda,
 			COALESCE(cf.nome, '') AS conta_fixa,
-			COALESCE(fp.nome, '') AS forma_pagamento
+			COALESCE(fp.nome, '') AS forma_pagamento,
+			CASE WHEN lf.data_pagamento IS NOT NULL THEN 'PAGA' ELSE 'EM ABERTO' END AS status_pagamento
 		FROM lancamento_financeiro lf
 		JOIN categoria_financeira c ON c.id_categoria = lf.id_categoria
 		LEFT JOIN fonte_renda fr ON fr.id_fonte_renda = lf.id_fonte_renda
@@ -64,6 +69,8 @@ func (h *LancamentoHandler) List(c *gin.Context) {
 		if err := rows.Scan(
 			&lf.ID,
 			&lf.DataLancamento,
+			&lf.DataVencimento,
+			&lf.DataPagamento,
 			&lf.Descricao,
 			&lf.Tipo,
 			&lf.Valor,
@@ -78,8 +85,71 @@ func (h *LancamentoHandler) List(c *gin.Context) {
 			&lf.FonteRendaNome,
 			&lf.ContaFixaNome,
 			&lf.FormaPagamentoNome,
+			&lf.StatusPagamento,
 		); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao ler lançamento"})
+			return
+		}
+		items = append(items, lf)
+	}
+
+	c.JSON(http.StatusOK, items)
+}
+
+// ListContasAPagar retorna despesas (tipo S) incluindo em aberto e pagas.
+func (h *LancamentoHandler) ListContasAPagar(c *gin.Context) {
+	rows, err := h.DB.Query(c, `
+		SELECT
+			lf.id_lancamento,
+			lf.descricao,
+			lf.valor,
+			lf.data_pagamento,
+			lf.data_vencimento,
+			c.nome AS categoria,
+			COALESCE(cf.nome, '') AS conta_fixa,
+			COALESCE(fp.nome, '') AS forma_pagamento,
+			lf.id_conta_fixa,
+			COALESCE(lf.observacao, '') AS observacao,
+			lf.criado_em,
+			CASE
+				WHEN lf.data_pagamento IS NOT NULL THEN 'PAGA'
+				ELSE 'EM ABERTO'
+			END AS status_pagamento
+		FROM lancamento_financeiro lf
+		JOIN categoria_financeira c ON c.id_categoria = lf.id_categoria
+		LEFT JOIN conta_fixa cf ON cf.id_conta_fixa = lf.id_conta_fixa
+		LEFT JOIN forma_pagamento fp ON fp.id_forma_pagamento = lf.id_forma_pagamento
+		WHERE lf.tipo = 'S'
+		ORDER BY
+			status_pagamento DESC,
+			cf.dia_vencimento NULLS LAST,
+			lf.data_pagamento DESC NULLS LAST,
+			lf.id_lancamento DESC
+	`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao listar contas a pagar"})
+		return
+	}
+	defer rows.Close()
+
+	var items []models.LancamentoFinanceiro
+	for rows.Next() {
+		var lf models.LancamentoFinanceiro
+		if err := rows.Scan(
+			&lf.ID,
+			&lf.Descricao,
+			&lf.Valor,
+			&lf.DataPagamento,
+			&lf.DataVencimento,
+			&lf.CategoriaNome,
+			&lf.ContaFixaNome,
+			&lf.FormaPagamentoNome,
+			&lf.IDContaFixa,
+			&lf.Observacao,
+			&lf.CriadoEm,
+			&lf.StatusPagamento,
+		); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao ler conta a pagar"})
 			return
 		}
 		items = append(items, lf)
@@ -100,6 +170,8 @@ func (h *LancamentoHandler) ListByDateRange(c *gin.Context) {
 		SELECT 
 			lf.id_lancamento,
 			lf.data_lancamento,
+			lf.data_vencimento,
+			lf.data_pagamento,
 			lf.descricao,
 			lf.tipo,
 			lf.valor,
@@ -113,7 +185,8 @@ func (h *LancamentoHandler) ListByDateRange(c *gin.Context) {
 			c.nome AS categoria,
 			COALESCE(fr.nome, '') AS fonte_renda,
 			COALESCE(cf.nome, '') AS conta_fixa,
-			COALESCE(fp.nome, '') AS forma_pagamento
+			COALESCE(fp.nome, '') AS forma_pagamento,
+			CASE WHEN lf.data_pagamento IS NOT NULL THEN 'PAGA' ELSE 'EM ABERTO' END AS status_pagamento
 		FROM lancamento_financeiro lf
 		JOIN categoria_financeira c ON c.id_categoria = lf.id_categoria
 		LEFT JOIN fonte_renda fr ON fr.id_fonte_renda = lf.id_fonte_renda
@@ -169,6 +242,8 @@ func (h *LancamentoHandler) ListByDateRange(c *gin.Context) {
 		if err := rows.Scan(
 			&lf.ID,
 			&lf.DataLancamento,
+			&lf.DataVencimento,
+			&lf.DataPagamento,
 			&lf.Descricao,
 			&lf.Tipo,
 			&lf.Valor,
@@ -183,6 +258,7 @@ func (h *LancamentoHandler) ListByDateRange(c *gin.Context) {
 			&lf.FonteRendaNome,
 			&lf.ContaFixaNome,
 			&lf.FormaPagamentoNome,
+			&lf.StatusPagamento,
 		); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao ler lançamento"})
 			return
@@ -200,6 +276,8 @@ func (h *LancamentoHandler) Get(c *gin.Context) {
 		SELECT 
 			lf.id_lancamento,
 			lf.data_lancamento,
+			lf.data_vencimento,
+			lf.data_pagamento,
 			lf.descricao,
 			lf.tipo,
 			lf.valor,
@@ -213,7 +291,8 @@ func (h *LancamentoHandler) Get(c *gin.Context) {
 			c.nome AS categoria,
 			COALESCE(fr.nome, '') AS fonte_renda,
 			COALESCE(cf.nome, '') AS conta_fixa,
-			COALESCE(fp.nome, '') AS forma_pagamento
+			COALESCE(fp.nome, '') AS forma_pagamento,
+			CASE WHEN lf.data_pagamento IS NOT NULL THEN 'PAGA' ELSE 'EM ABERTO' END AS status_pagamento
 		FROM lancamento_financeiro lf
 		JOIN categoria_financeira c ON c.id_categoria = lf.id_categoria
 		LEFT JOIN fonte_renda fr ON fr.id_fonte_renda = lf.id_fonte_renda
@@ -221,10 +300,10 @@ func (h *LancamentoHandler) Get(c *gin.Context) {
 		LEFT JOIN forma_pagamento fp ON fp.id_forma_pagamento = lf.id_forma_pagamento
 		WHERE lf.id_lancamento=$1`, id).
 		Scan(
-			&lf.ID, &lf.DataLancamento, &lf.Descricao, &lf.Tipo, &lf.Valor,
+			&lf.ID, &lf.DataLancamento, &lf.DataVencimento, &lf.DataPagamento, &lf.Descricao, &lf.Tipo, &lf.Valor,
 			&lf.IDCategoria, &lf.IDFonteRenda, &lf.IDContaFixa, &lf.IDFormaPagamento,
 			&lf.Observacao, &lf.CriadoEm, &lf.AtualizadoEm,
-			&lf.CategoriaNome, &lf.FonteRendaNome, &lf.ContaFixaNome, &lf.FormaPagamentoNome,
+			&lf.CategoriaNome, &lf.FonteRendaNome, &lf.ContaFixaNome, &lf.FormaPagamentoNome, &lf.StatusPagamento,
 		)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Lançamento não encontrado"})
@@ -245,15 +324,35 @@ func (h *LancamentoHandler) Create(c *gin.Context) {
 		return
 	}
 
+	var dataVencimento *time.Time
+	if payload.DataVencimento != nil && *payload.DataVencimento != "" {
+		parsed, err := time.Parse("2006-01-02", *payload.DataVencimento)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Data de vencimento inválida"})
+			return
+		}
+		dataVencimento = &parsed
+	}
+
+	var dataPagamento *time.Time
+	if payload.DataPagamento != nil && *payload.DataPagamento != "" {
+		parsed, err := time.Parse("2006-01-02", *payload.DataPagamento)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Data de pagamento inválida"})
+			return
+		}
+		dataPagamento = &parsed
+	}
+
 	var lf models.LancamentoFinanceiro
 	err = h.DB.QueryRow(c, `
 		INSERT INTO lancamento_financeiro (
-			data_lancamento, descricao, tipo, valor, id_categoria, id_fonte_renda, id_conta_fixa, id_forma_pagamento, observacao
-		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-		RETURNING id_lancamento, data_lancamento, descricao, tipo, valor, id_categoria, id_fonte_renda, id_conta_fixa, id_forma_pagamento, observacao, criado_em, atualizado_em`,
-		data, payload.Descricao, payload.Tipo, payload.Valor, payload.IDCategoria, payload.IDFonteRenda, payload.IDContaFixa, payload.IDFormaPagamento, payload.Observacao,
+			data_lancamento, data_vencimento, data_pagamento, descricao, tipo, valor, id_categoria, id_fonte_renda, id_conta_fixa, id_forma_pagamento, observacao
+		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		RETURNING id_lancamento, data_lancamento, data_vencimento, data_pagamento, descricao, tipo, valor, id_categoria, id_fonte_renda, id_conta_fixa, id_forma_pagamento, observacao, criado_em, atualizado_em`,
+		data, dataVencimento, dataPagamento, payload.Descricao, payload.Tipo, payload.Valor, payload.IDCategoria, payload.IDFonteRenda, payload.IDContaFixa, payload.IDFormaPagamento, payload.Observacao,
 	).Scan(
-		&lf.ID, &lf.DataLancamento, &lf.Descricao, &lf.Tipo, &lf.Valor, &lf.IDCategoria, &lf.IDFonteRenda, &lf.IDContaFixa, &lf.IDFormaPagamento, &lf.Observacao, &lf.CriadoEm, &lf.AtualizadoEm,
+		&lf.ID, &lf.DataLancamento, &lf.DataVencimento, &lf.DataPagamento, &lf.Descricao, &lf.Tipo, &lf.Valor, &lf.IDCategoria, &lf.IDFonteRenda, &lf.IDContaFixa, &lf.IDFormaPagamento, &lf.Observacao, &lf.CriadoEm, &lf.AtualizadoEm,
 	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao criar lançamento"})
@@ -275,15 +374,35 @@ func (h *LancamentoHandler) Update(c *gin.Context) {
 		return
 	}
 
+	var dataVencimento *time.Time
+	if payload.DataVencimento != nil && *payload.DataVencimento != "" {
+		parsed, err := time.Parse("2006-01-02", *payload.DataVencimento)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Data de vencimento inválida"})
+			return
+		}
+		dataVencimento = &parsed
+	}
+
+	var dataPagamento *time.Time
+	if payload.DataPagamento != nil && *payload.DataPagamento != "" {
+		parsed, err := time.Parse("2006-01-02", *payload.DataPagamento)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Data de pagamento inválida"})
+			return
+		}
+		dataPagamento = &parsed
+	}
+
 	var lf models.LancamentoFinanceiro
 	err = h.DB.QueryRow(c, `
 		UPDATE lancamento_financeiro
-		SET data_lancamento=$1, descricao=$2, tipo=$3, valor=$4, id_categoria=$5, id_fonte_renda=$6, id_conta_fixa=$7, id_forma_pagamento=$8, observacao=$9, atualizado_em=NOW()
-		WHERE id_lancamento=$10
-		RETURNING id_lancamento, data_lancamento, descricao, tipo, valor, id_categoria, id_fonte_renda, id_conta_fixa, id_forma_pagamento, observacao, criado_em, atualizado_em`,
-		data, payload.Descricao, payload.Tipo, payload.Valor, payload.IDCategoria, payload.IDFonteRenda, payload.IDContaFixa, payload.IDFormaPagamento, payload.Observacao, id,
+		SET data_lancamento=$1, data_vencimento=$2, data_pagamento=$3, descricao=$4, tipo=$5, valor=$6, id_categoria=$7, id_fonte_renda=$8, id_conta_fixa=$9, id_forma_pagamento=$10, observacao=$11, atualizado_em=NOW()
+		WHERE id_lancamento=$12
+		RETURNING id_lancamento, data_lancamento, data_vencimento, data_pagamento, descricao, tipo, valor, id_categoria, id_fonte_renda, id_conta_fixa, id_forma_pagamento, observacao, criado_em, atualizado_em`,
+		data, dataVencimento, dataPagamento, payload.Descricao, payload.Tipo, payload.Valor, payload.IDCategoria, payload.IDFonteRenda, payload.IDContaFixa, payload.IDFormaPagamento, payload.Observacao, id,
 	).Scan(
-		&lf.ID, &lf.DataLancamento, &lf.Descricao, &lf.Tipo, &lf.Valor, &lf.IDCategoria, &lf.IDFonteRenda, &lf.IDContaFixa, &lf.IDFormaPagamento, &lf.Observacao, &lf.CriadoEm, &lf.AtualizadoEm,
+		&lf.ID, &lf.DataLancamento, &lf.DataVencimento, &lf.DataPagamento, &lf.Descricao, &lf.Tipo, &lf.Valor, &lf.IDCategoria, &lf.IDFonteRenda, &lf.IDContaFixa, &lf.IDFormaPagamento, &lf.Observacao, &lf.CriadoEm, &lf.AtualizadoEm,
 	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao atualizar lançamento"})

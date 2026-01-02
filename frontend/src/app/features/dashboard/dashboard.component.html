@@ -70,16 +70,76 @@
       </div>
     </div>
 
-    <div class="chart-card">
+    <div class="chart-card calendar-chart">
       <div class="chart-header">
-        <h3>Participação</h3>
+        <div>
+          <p class="eyebrow">Calendário</p>
+          <h3>{{ calendarMonthLabel }} {{ calendarYear }}</h3>
+        </div>
+        <span class="chip">Hoje</span>
       </div>
-      <div class="chart-wrapper">
-        <p-chart *ngIf="doughnutData" type="doughnut" [data]="doughnutData" [options]="doughnutOptions" height="260px"></p-chart>
-        <p *ngIf="!doughnutData" class="no-data">Carregando dados...</p>
+      <div class="calendar-grid">
+        <div class="dow" *ngFor="let dow of ['Mo','Tu','We','Th','Fr','Sa','Su']">{{ dow }}</div>
+        <ng-container *ngFor="let week of calendarWeeks">
+          <div
+            class="day"
+            *ngFor="let day of week"
+            [class.today]="day.isToday"
+            [class.muted]="!day.isCurrentMonth"
+            [class.entrada]="day.hasEntrada && !day.hasSaida && !day.hasContaFixa"
+            [class.saida]="day.hasSaida && !day.hasEntrada && !day.hasContaFixa"
+            [class.both]="day.hasEntrada && day.hasSaida && !day.hasContaFixa"
+            [class.conta-fixa]="day.hasContaFixa"
+            [class.clickable]="day.hasEntrada || day.hasSaida || day.hasContaFixa"
+            (click)="onDayClick(day)"
+          >
+            <span *ngIf="day.day">{{ day.day }}</span>
+          </div>
+        </ng-container>
+      </div>
+      <div class="calendar-legend">
+        <span class="legend entrada"></span> Entrada
+        <span class="legend saida"></span> Saída
+        <span class="legend both"></span> Ambas
+        <span class="legend conta-fixa"></span> Conta Fixa
       </div>
     </div>
   </section>
 
-  
+  <div class="modal-backdrop" *ngIf="modalOpen" (click)="fecharModal()"></div>
+  <div class="modal" *ngIf="modalOpen">
+    <div class="modal-header">
+      <div>
+        <p class="eyebrow">Lançamentos</p>
+        <h3>{{ modalData?.dateLabel }}</h3>
+      </div>
+      <button class="close-btn" type="button" (click)="fecharModal()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-column">
+        <h4>Entradas</h4>
+        <p *ngIf="!(modalData?.entradas?.length)" class="empty">Sem entradas</p>
+        <div class="item" *ngFor="let item of modalData?.entradas">
+          <div class="dot entrada"></div>
+          <div class="info">
+            <p class="title">{{ item.descricao }}</p>
+            <p class="value">{{ formatCurrency(item.valor) }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-column">
+        <h4>Saídas</h4>
+        <p *ngIf="!(modalData?.saidas?.length)" class="empty">Sem saídas</p>
+        <div class="item" *ngFor="let item of modalData?.saidas">
+          <div class="dot saida"></div>
+          <div class="info">
+            <p class="title">{{ item.descricao }}</p>
+            <p class="value">{{ formatCurrency(item.valor) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

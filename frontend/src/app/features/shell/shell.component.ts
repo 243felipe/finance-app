@@ -87,6 +87,7 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
         { label: 'Receita - Salário', icon: 'pi pi-dollar', route: '/lancamentos/receita/salario' },
         { label: 'Receita - Renda Extra', icon: 'pi pi-dollar', route: '/lancamentos/receita/renda-extra' },
         { label: 'Despesa - Contas do Dia', icon: 'pi pi-book', route: '/lancamentos/despesa/contas-dia' },
+        { label: 'Despesa (Unificada)', icon: 'pi pi-wallet', route: '/lancamentos/despesa/contas-a-pagar' },
         { label: 'Despesa - Extras', icon: 'pi pi-book', route: '/lancamentos/despesa/despesas-extras' },
         { label: 'Pagamento Conta Fixa', icon: 'pi pi-credit-card', route: '/lancamentos/pagamento-conta-fixa' },
         { label: 'Recorrentes - Entradas', icon: 'pi pi-refresh', route: '/lancamentos/recorrentes/entradas' },

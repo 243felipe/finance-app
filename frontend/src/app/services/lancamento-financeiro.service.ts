@@ -29,6 +29,10 @@ export class LancamentoFinanceiroService {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
+  listContasAPagar(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/contas-a-pagar`);
+  }
+
   listByDateRange(params: {
     dataInicio?: string;
     dataFim?: string;

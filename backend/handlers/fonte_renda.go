@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"portal-backend/models"
@@ -108,9 +109,19 @@ func (h *FonteRendaHandler) Update(c *gin.Context) {
 
 func (h *FonteRendaHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
-	_, err := h.DB.Exec(c, `DELETE FROM fonte_renda WHERE id_fonte_renda=$1`, id)
+	ct, err := h.DB.Exec(c, `DELETE FROM fonte_renda WHERE id_fonte_renda=$1`, id)
 	if err != nil {
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23503" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Não é possível excluir: esta fonte de renda está sendo usada em lançamentos financeiros (telas de Receitas/Despesas/Recorrentes). Ajuste ou remova esses lançamentos antes de excluir.",
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao excluir fonte de renda"})
+		return
+	}
+	if ct.RowsAffected() == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Fonte de renda não encontrada"})
 		return
 	}
 	c.Status(http.StatusNoContent)

@@ -171,6 +171,13 @@ EXECUTE PROCEDURE set_lancamento_financeiro_atualizado();
 ALTER TABLE lancamento_financeiro 
 ADD COLUMN IF NOT EXISTS gerado_recorrente BOOLEAN NOT NULL DEFAULT FALSE;
 
+-- Ajustes para contas a pagar: datas opcionais de vencimento e pagamento
+ALTER TABLE lancamento_financeiro
+ADD COLUMN IF NOT EXISTS data_vencimento DATE;
+
+ALTER TABLE lancamento_financeiro
+ADD COLUMN IF NOT EXISTS data_pagamento DATE;
+
 -- Tabela de lançamentos recorrentes (modelo de lançamento, não referência a um existente)
 CREATE TABLE IF NOT EXISTS lancamento_recorrente (
     id_recorrente SERIAL PRIMARY KEY,

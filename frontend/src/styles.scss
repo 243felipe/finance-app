@@ -115,3 +115,9 @@ a {
 .text-muted {
   color: rgba(13, 6, 100, 0.7);
 }
+
+/* Ajuste de contraste nos toasts: detalhe em verde escuro para avisos/erros. */
+.p-toast .p-toast-detail {
+  color: #0f5132 !important; /* verde forte para melhor leitura */
+  font-weight: 600;
+}

@@ -1,0 +1,160 @@
+.contas-pagar {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: #ffffff;
+  border: 1px solid rgba(13, 6, 100, 0.08);
+  border-radius: 16px;
+  color: #0d0664;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  h2 {
+    margin: 0;
+    color: #0d0664;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: #475569;
+    font-size: 0.9rem;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label {
+    font-weight: 600;
+    color: #0d0664;
+  }
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.badge.paga {
+  background: #e6f4ea;
+  color: #0f5132;
+}
+
+.badge.aberto {
+  background: #fff4e5;
+  color: #b54708;
+}
+
+/* Harmoniza tabela com padrão claro das outras telas */
+:host ::ng-deep .p-datatable {
+  background: #ffffff;
+}
+
+:host ::ng-deep .p-datatable-header {
+  background: #ffffff;
+  border: none;
+}
+
+:host ::ng-deep .p-datatable-thead > tr > th {
+  background: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+}
+
+:host ::ng-deep .p-datatable-tbody > tr > td {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #f1f5f9;
+}
+
+:host ::ng-deep .p-datatable-tbody > tr:nth-child(even) > td {
+  background: #f8fafc;
+}
+
+/* Ajuste de aparência dos selects (p-select) para fundo claro */
+:host ::ng-deep .p-select {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+:host ::ng-deep .p-select-panel {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+:host ::ng-deep .p-select-option {
+  color: #0f172a;
+}
+
+:host ::ng-deep .p-select-option:not(.p-focus):not(.p-highlight) {
+  background: #ffffff;
+}
+
+:host ::ng-deep .p-select-option.p-highlight {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+:host ::ng-deep .p-select-option.p-focus {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Scrollbar mais claro dentro do dropdown */
+:host ::ng-deep .p-select-panel::-webkit-scrollbar {
+  width: 8px;
+}
+:host ::ng-deep .p-select-panel::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+:host ::ng-deep .p-select-panel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+:host ::ng-deep .p-select-panel::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Label do select visível em fundo claro */
+:host ::ng-deep .p-select-label {
+  color: #0f172a !important;
+}
+
+:host ::ng-deep .p-select {
+  background: #ffffff;
+  color: #0f172a;
+}
+
