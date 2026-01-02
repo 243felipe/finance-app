@@ -70,15 +70,22 @@
           </button>
         </div>
       </div>
-      <div class="user-menu-container" #userMenuContainer>
+      <div class="topbar-actions">
         <button
           pButton
-          icon="pi pi-user"
-          class="p-button-text user-btn"
-          #userBtn
-          (click)="toggleUserMenu()"
-          [class.active]="userMenuOpen"
+          label="+ LISTA"
+          class="p-button-text lista-btn"
+          (click)="openListaModal()"
         ></button>
+        <div class="user-menu-container" #userMenuContainer>
+          <button
+            pButton
+            icon="pi pi-user"
+            class="p-button-text user-btn"
+            #userBtn
+            (click)="toggleUserMenu()"
+            [class.active]="userMenuOpen"
+          ></button>
         <div
           class="user-menu-dropdown"
           *ngIf="userMenuOpen"
@@ -93,6 +100,7 @@
             <i class="pi pi-sign-out"></i>
             <span>Sair</span>
           </button>
+        </div>
         </div>
       </div>
     </header>
@@ -221,5 +229,92 @@
         <button pButton label="Continuar" class="p-button-primary" (click)="extendSession()"></button>
       </div>
     </div>
+  </p-dialog>
+
+  <!-- Modal de Nova Lista de Compras -->
+  <p-dialog
+    [(visible)]="listaModalVisible"
+    [modal]="true"
+    [closable]="true"
+    [style]="{ width: '700px' }"
+    [contentStyle]="{ height: '500px', display: 'flex', flexDirection: 'column', padding: '0' }"
+    header="Nova Lista de Compras"
+    (onHide)="closeListaModal()"
+    styleClass="lista-modal-dialog"
+  >
+    <div class="lista-content">
+      <div class="lista-field">
+        <label>DESCRIÇÃO</label>
+        <input
+          pInputText
+          [(ngModel)]="listaDescricao"
+          placeholder="Digite a descrição da lista"
+          class="field-input"
+        />
+      </div>
+
+      <div class="lista-items">
+        <div class="lista-items-header">
+          <h4>Itens da Lista</h4>
+          <button
+            pButton
+            label="+ Adicionar Item"
+            icon="pi pi-plus"
+            class="p-button-sm p-button-outlined"
+            (click)="addItem()"
+          ></button>
+        </div>
+
+        <div class="lista-items-grid">
+          <div class="lista-item-row" *ngFor="let item of listaItems; let i = index">
+            <input
+              pInputText
+              [(ngModel)]="item.descricao"
+              placeholder="Nome do produto"
+              class="item-input"
+              [id]="'item-desc-' + i"
+            />
+            <input
+              pInputText
+              type="number"
+              [(ngModel)]="item.valor"
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              class="item-input item-valor"
+              (input)="updateTotal()"
+            />
+            <button
+              pButton
+              icon="pi pi-trash"
+              class="p-button-text p-button-danger p-button-sm"
+              (click)="removeItem(i)"
+            ></button>
+          </div>
+          <p *ngIf="listaItems.length === 0" class="no-items">Nenhum item adicionado ainda</p>
+        </div>
+      </div>
+
+      <div class="lista-footer">
+        <div class="lista-total">
+          <span class="total-label">Total:</span>
+          <span class="total-value">{{ listaTotal | currency:'BRL':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <div class="lista-actions">
+        <button pButton type="button" label="Cancelar" class="p-button-text" (click)="closeListaModal()"></button>
+        <button
+          pButton
+          type="button"
+          label="SALVAR"
+          class="p-button-primary"
+          (click)="saveLista()"
+          [loading]="savingLista"
+          [disabled]="!listaDescricao.trim() || listaItems.length === 0"
+        ></button>
+      </div>
+    </ng-template>
   </p-dialog>
 </div>

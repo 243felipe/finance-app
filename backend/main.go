@@ -109,6 +109,7 @@ func main() {
 			secured.GET("/lista-compras", listaComprasHandler.List)
 			secured.GET("/lista-compras/:id", listaComprasHandler.Get)
 			secured.POST("/lista-compras", listaComprasHandler.Create)
+			secured.POST("/lista-compras/com-itens", listaComprasHandler.CreateComItens)
 			secured.PUT("/lista-compras/:id", listaComprasHandler.Update)
 			secured.DELETE("/lista-compras/:id", listaComprasHandler.Delete)
 

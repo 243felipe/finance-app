@@ -17,6 +17,16 @@ type listaComprasInput struct {
 	Nome string `json:"nome" binding:"required,min=2"`
 }
 
+type listaComprasComItensInput struct {
+	Nome  string                      `json:"nome" binding:"required,min=2"`
+	Itens []itemListaComprasInputItem `json:"itens" binding:"required,min=1,dive"`
+}
+
+type itemListaComprasInputItem struct {
+	Descricao string  `json:"descricao" binding:"required,min=1"`
+	Valor     float64 `json:"valor" binding:"required,gt=0"`
+}
+
 func (h *ListaComprasHandler) List(c *gin.Context) {
 	rows, err := h.DB.Query(c, `
 		SELECT id, nome, data
@@ -76,6 +86,69 @@ func (h *ListaComprasHandler) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, lc)
+}
+
+func (h *ListaComprasHandler) CreateComItens(c *gin.Context) {
+	var payload listaComprasComItensInput
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Dados inválidos", "error": err.Error()})
+		return
+	}
+
+	// Inicia uma transação
+	tx, err := h.DB.Begin(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao iniciar transação"})
+		return
+	}
+	defer tx.Rollback(c.Request.Context())
+
+	// Insere a lista de compras
+	var listaID int64
+	var listaNome string
+	var listaData interface{}
+	err = tx.QueryRow(c.Request.Context(), `
+		INSERT INTO lista_compras (nome, data)
+		VALUES ($1, CURRENT_DATE)
+		RETURNING id, nome, data`,
+		payload.Nome,
+	).Scan(&listaID, &listaNome, &listaData)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao criar lista"})
+		return
+	}
+
+	// Insere os itens
+	var itens []models.ItemListaCompras
+	for _, itemInput := range payload.Itens {
+		var item models.ItemListaCompras
+		err = tx.QueryRow(c.Request.Context(), `
+			INSERT INTO item_lista_compras (lista_compras_id, descricao, valor)
+			VALUES ($1, $2, $3)
+			RETURNING id, lista_compras_id, descricao, valor`,
+			listaID, itemInput.Descricao, itemInput.Valor,
+		).Scan(&item.ID, &item.ListaComprasID, &item.Descricao, &item.Valor)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao criar item"})
+			return
+		}
+		itens = append(itens, item)
+	}
+
+	// Commit da transação
+	if err = tx.Commit(c.Request.Context()); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao finalizar transação"})
+		return
+	}
+
+	// Retorna a resposta com a lista e os itens
+	c.JSON(http.StatusCreated, gin.H{
+		"lista": models.ListaCompras{
+			ID:   listaID,
+			Nome: listaNome,
+		},
+		"itens": itens,
+	})
 }
 
 func (h *ListaComprasHandler) Update(c *gin.Context) {
