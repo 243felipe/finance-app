@@ -96,14 +96,15 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
       icon: 'pi pi-plus-circle',
       route: '',
       children: [
-        { label: 'Receita - Salário', icon: 'pi pi-dollar', route: '/lancamentos/receita/salario' },
-        { label: 'Receita - Renda Extra', icon: 'pi pi-dollar', route: '/lancamentos/receita/renda-extra' },
         { label: 'Despesa - Contas do Dia', icon: 'pi pi-book', route: '/lancamentos/despesa/contas-dia' },
-        { label: 'Despesa (Unificada)', icon: 'pi pi-wallet', route: '/lancamentos/despesa/contas-a-pagar' },
-        { label: 'Despesa - Extras', icon: 'pi pi-book', route: '/lancamentos/despesa/despesas-extras' },
         { label: 'Pagamento Conta Fixa', icon: 'pi pi-credit-card', route: '/lancamentos/pagamento-conta-fixa' },
-        { label: 'Recorrentes - Entradas', icon: 'pi pi-refresh', route: '/lancamentos/recorrentes/entradas' },
-        { label: 'Recorrentes - Saídas', icon: 'pi pi-refresh', route: '/lancamentos/recorrentes/saidas' }
+        // Itens removidos conforme solicitação:
+        // - Receita - Salário
+        // - Receita - Renda Extra
+        // - Despesa (Unificada)
+        // - Despesa - Extras
+        // - Recorrentes - Entradas
+        // - Recorrentes - Saídas
       ]
     },
     {
