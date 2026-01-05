@@ -1,60 +1,71 @@
 <div class="login-layout">
-  <div class="illustration">
-    <div class="image-overlay"></div>
-  </div>
+  <div class="login-wrapper">
+    <div class="illustration">
+      <div class="image-overlay"></div>
+    </div>
 
-  <div class="form-side">
-    <div class="form-card">
-      <div class="brand-logo">
-        <img src="/images/logo_unica_login.png" alt="Logo" />
+    <div class="form-side">
+      <div class="form-card">
+        <div class="brand-logo">
+          <img src="/images/logo_unica_login_colorida.png" alt="Logo" />
+        </div>
+        <h1>Alto da Colina</h1>
+        <p class="subtitle">Confiança que gera resultados</p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="form" novalidate>
+          <div class="field-group">
+            <label for="login">Login</label>
+            <input
+              pInputText
+              id="login"
+              formControlName="login"
+              autocomplete="username"
+              placeholder="ID"
+            />
+            <small *ngIf="form.get('login')?.invalid && form.get('login')?.touched" class="error">
+              Informe seu ID de acesso.
+            </small>
+          </div>
+
+          <div class="field-group">
+            <label for="password">Senha</label>
+            <p-password
+              inputId="password"
+              formControlName="password"
+              [feedback]="false"
+              toggleMask="true"
+              styleClass="password-field"
+              inputStyleClass="text-input"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            ></p-password>
+            <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched" class="error">
+              Informe a senha.
+            </small>
+          </div>
+
+          <div class="form-actions">
+            <label class="remember">
+              <input type="checkbox" />
+              <span>Lembrar-me</span>
+            </label>
+            <button type="button" class="link-btn" (click)="solicitarAjuda()">Esqueceu a senha?</button>
+          </div>
+
+          <button pButton type="submit" label="Acessar" [loading]="loading" class="submit-btn"></button>
+
+          <div class="extra-actions">
+            <button type="button" class="google-btn">
+              <img class="google-icon" src="/images/Google__G__logo.svg.png" alt="Google" />
+              <span>Entrar com email</span>
+            </button>
+            <div class="signup">
+              <span>Não tem cadastro?</span>
+              <button type="button" class="link-accent" (click)="solicitarAjuda()">Criar conta</button>
+            </div>
+          </div>
+        </form>
       </div>
-      <h1>Alto da Colina</h1>
-      <p class="subtitle">Confiança que gera resultados</p>
-
-      <form [formGroup]="form" (ngSubmit)="submit()" class="form" novalidate>
-        <div class="field-group">
-          <label for="login">Login</label>
-          <input
-            pInputText
-            id="login"
-            formControlName="login"
-            autocomplete="username"
-            placeholder="ID"
-          />
-          <small *ngIf="form.get('login')?.invalid && form.get('login')?.touched" class="error">
-            Informe seu ID de acesso.
-          </small>
-        </div>
-
-        <div class="field-group">
-          <label for="password">Senha</label>
-          <p-password
-            inputId="password"
-            formControlName="password"
-            [feedback]="false"
-            toggleMask="true"
-            styleClass="password-field"
-            inputStyleClass="text-input"
-            placeholder="••••••••"
-            autocomplete="current-password"
-          ></p-password>
-          <small *ngIf="form.get('password')?.invalid && form.get('password')?.touched" class="error">
-            Informe a senha.
-          </small>
-        </div>
-
-        <div class="form-actions">
-          <label class="remember">
-            <input type="checkbox" />
-            <span>Lembrar-me</span>
-          </label>
-          <button type="button" class="link-btn" (click)="solicitarAjuda()">Esqueceu a senha?</button>
-        </div>
-
-        <button pButton type="submit" label="Acessar" [loading]="loading" class="submit-btn"></button>
-      </form>
-
-      
     </div>
   </div>
 </div>
