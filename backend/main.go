@@ -70,6 +70,7 @@ func main() {
 			secured.PUT("/products/:id", productHandler.Update)
 			secured.DELETE("/products/:id", productHandler.Delete)
 
+			// Rotas de categorias
 			secured.GET("/categorias", categoriaHandler.List)
 			secured.GET("/categorias/:id", categoriaHandler.Get)
 			secured.POST("/categorias", categoriaHandler.Create)
