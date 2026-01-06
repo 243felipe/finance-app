@@ -71,6 +71,7 @@ func main() {
 			secured.DELETE("/products/:id", productHandler.Delete)
 
 			secured.GET("/categorias", categoriaHandler.List)
+			secured.GET("/categorias/:id", categoriaHandler.Get)
 			secured.POST("/categorias", categoriaHandler.Create)
 			secured.PUT("/categorias/:id", categoriaHandler.Update)
 			secured.DELETE("/categorias/:id", categoriaHandler.Delete)

@@ -42,6 +42,21 @@ func (h *CategoriaHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, items)
 }
 
+func (h *CategoriaHandler) Get(c *gin.Context) {
+	id := c.Param("id")
+	var cat models.Categoria
+	err := h.DB.QueryRow(c, `
+		SELECT id, nome, ativo, data_cadastro
+		FROM categoria
+		WHERE id=$1`, id).
+		Scan(&cat.ID, &cat.Nome, &cat.Ativo, &cat.DataCadastro)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Categoria não encontrada"})
+		return
+	}
+	c.JSON(http.StatusOK, cat)
+}
+
 func (h *CategoriaHandler) Create(c *gin.Context) {
 	var payload categoriaInput
 	if err := c.ShouldBindJSON(&payload); err != nil {
