@@ -92,12 +92,23 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
       ]
     },
     {
+      label: 'Estoque',
+      icon: 'pi pi-box',
+      route: '',
+      children: [
+        { label: 'Cadastro - Categoria', icon: 'pi pi-tags', route: '/estoque/categoria' },
+        { label: 'Cadastro de Produtos', icon: 'pi pi-box', route: '/estoque/produto' },
+        { label: 'Entrada de Estoque', icon: 'pi pi-sign-in', route: '/estoque/entrada' }
+      ]
+    },
+    {
       label: 'Lançamentos',
       icon: 'pi pi-plus-circle',
       route: '',
       children: [
         { label: 'Despesa - Contas do Dia', icon: 'pi pi-book', route: '/lancamentos/despesa/contas-dia' },
         { label: 'Pagamento Conta Fixa', icon: 'pi pi-credit-card', route: '/lancamentos/pagamento-conta-fixa' },
+        { label: 'Lançamentos Serviços', icon: 'pi pi-briefcase', route: '/lancamentos/servicos' },
         // Itens removidos conforme solicitação:
         // - Receita - Salário
         // - Receita - Renda Extra
@@ -105,15 +116,6 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
         // - Despesa - Extras
         // - Recorrentes - Entradas
         // - Recorrentes - Saídas
-      ]
-    },
-    {
-      label: 'Mercado',
-      icon: 'pi pi-shopping-cart',
-      route: '',
-      children: [
-        { label: 'Lançamento - Mercado', icon: 'pi pi-dollar', route: '/mercado/lancamento' },
-        { label: 'Anotações - Mercado', icon: 'pi pi-list', route: '/mercado/anotacoes' }
       ]
     },
     {

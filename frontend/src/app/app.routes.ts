@@ -99,14 +99,30 @@ export const routes: Routes = [
         data: { title: 'Lançamentos Recorrentes - Saídas' }
       },
       {
-        path: 'mercado/lancamento',
+        path: 'lancamentos/servicos',
         loadComponent: () =>
-          import('./features/mercado/lancamento-mercado/lancamento-mercado.component').then((c) => c.LancamentoMercadoComponent)
+          import('./features/lancamentos/servicos/lancamentos-servicos.component').then((c) => c.LancamentosServicosComponent),
+        data: { title: 'Lançamentos Serviços' }
       },
       {
-        path: 'mercado/anotacoes',
+        path: 'estoque/produto',
         loadComponent: () =>
-          import('./features/mercado/anotacoes-mercado/anotacoes-mercado.component').then((c) => c.AnotacoesMercadoComponent)
+          import('./features/estoque/produto-cadastro/produto-cadastro.component').then((c) => c.ProdutoCadastroComponent)
+      },
+      {
+        path: 'estoque/categoria',
+        loadComponent: () =>
+          import('./features/estoque/categoria-cadastro/categoria-cadastro.component').then((c) => c.CategoriaCadastroComponent)
+      },
+      {
+        path: 'estoque/entrada',
+        loadComponent: () =>
+          import('./features/estoque/entrada-estoque/entrada-estoque.component').then((c) => c.EntradaEstoqueComponent)
+      },
+      {
+        path: 'estoque/verificacao',
+        loadComponent: () =>
+          import('./features/estoque/verificacao-estoque/verificacao-estoque.component').then((c) => c.VerificacaoEstoqueComponent)
       },
       {
         path: 'relatorios/receita-salario',

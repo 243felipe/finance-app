@@ -33,6 +33,9 @@ func main() {
 
 	authHandler := handlers.AuthHandler{DB: pool, JWTSecret: cfg.JWTSecret}
 	productHandler := handlers.ProductHandler{DB: pool}
+	estoqueMovHandler := handlers.EstoqueMovimentacaoHandler{DB: pool}
+	lancamentoServicoHandler := handlers.LancamentoServicoHandler{DB: pool}
+	categoriaHandler := handlers.CategoriaHandler{DB: pool}
 	financialCategoryHandler := handlers.FinancialCategoryHandler{DB: pool}
 	fixedAccountHandler := handlers.FixedAccountHandler{DB: pool}
 	fonteRendaHandler := handlers.FonteRendaHandler{DB: pool}
@@ -66,6 +69,24 @@ func main() {
 			secured.POST("/products", productHandler.Create)
 			secured.PUT("/products/:id", productHandler.Update)
 			secured.DELETE("/products/:id", productHandler.Delete)
+
+			secured.GET("/categorias", categoriaHandler.List)
+			secured.POST("/categorias", categoriaHandler.Create)
+			secured.PUT("/categorias/:id", categoriaHandler.Update)
+			secured.DELETE("/categorias/:id", categoriaHandler.Delete)
+
+			secured.GET("/estoque-movimentacoes", estoqueMovHandler.List)
+			secured.POST("/estoque-movimentacoes", estoqueMovHandler.Create)
+			secured.PUT("/estoque-movimentacoes/:id", estoqueMovHandler.Update)
+			secured.DELETE("/estoque-movimentacoes/:id", estoqueMovHandler.Delete)
+			secured.GET("/estoque-movimentacoes/ultimo-valor/:idProduto", estoqueMovHandler.GetLastValor)
+			secured.GET("/estoque/saldo/:idProduto", estoqueMovHandler.GetSaldo)
+
+			secured.GET("/lancamentos-servicos", lancamentoServicoHandler.List)
+			secured.POST("/lancamentos-servicos", lancamentoServicoHandler.Create)
+			secured.GET("/lancamentos-servicos/:id", lancamentoServicoHandler.Get)
+			secured.PUT("/lancamentos-servicos/:id", lancamentoServicoHandler.Update)
+			secured.DELETE("/lancamentos-servicos/:id", lancamentoServicoHandler.Delete)
 
 			secured.GET("/categorias-financeiras", financialCategoryHandler.List)
 			secured.GET("/categorias-financeiras/:id", financialCategoryHandler.Get)

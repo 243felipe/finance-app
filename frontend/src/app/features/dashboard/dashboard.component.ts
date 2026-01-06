@@ -56,7 +56,7 @@ type CalendarEventMap = Record<
 export class DashboardComponent implements OnInit, OnDestroy {
   saudacao = '';
   cards: StatCard[] = [
-    { label: 'Total Entradas (mês)', value: 'R$ 0,00', change: '', icon: 'pi pi-arrow-up' },
+    { label: 'Total em Estoque', value: 'R$ 0,00', change: '', icon: 'pi pi-arrow-up' },
     { label: 'Total Saídas (mês)', value: 'R$ 0,00', change: '', icon: 'pi pi-arrow-down' },
     { label: 'Recorrentes - Entradas', value: 'R$ 0,00', change: '', icon: 'pi pi-refresh' },
     { label: 'Contas Fixas', value: 'R$ 0,00', change: '', icon: 'pi pi-wallet' },
@@ -183,8 +183,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private atualizarCards(data: DashboardCards): void {
     this.cards = [
       { 
-        label: 'Total Entradas (mês)', 
-        value: this.formatCurrency(data.totalEntradasMes), 
+        label: 'Total em Estoque', 
+        value: this.formatCurrency(data.totalEstoque), 
         change: '', 
         icon: 'pi pi-arrow-up' 
       },

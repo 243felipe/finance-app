@@ -31,6 +31,101 @@ BEFORE UPDATE ON products
 FOR EACH ROW
 EXECUTE PROCEDURE set_products_updated_at();
 
+-- ==============================
+-- Estoque: categorias e produtos
+-- ==============================
+
+CREATE TABLE IF NOT EXISTS categoria (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS produto (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    descricao TEXT,
+    id_categoria INT,
+    unidade VARCHAR(20) NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_produto_categoria FOREIGN KEY (id_categoria) REFERENCES categoria (id)
+);
+
+CREATE OR REPLACE FUNCTION set_produto_atualizacao()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.data_atualizacao = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_produto_atualizacao ON produto;
+CREATE TRIGGER trg_produto_atualizacao
+BEFORE UPDATE ON produto
+FOR EACH ROW
+EXECUTE PROCEDURE set_produto_atualizacao();
+
+-- Estoque atual (1 registro por produto)
+CREATE TABLE IF NOT EXISTS estoque (
+    id SERIAL PRIMARY KEY,
+    id_produto INT NOT NULL UNIQUE,
+    quantidade NUMERIC(15,3) NOT NULL DEFAULT 0,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_estoque_produto FOREIGN KEY (id_produto) REFERENCES produto (id)
+);
+
+-- Movimentação de estoque (histórico)
+CREATE TABLE IF NOT EXISTS estoque_movimentacao (
+    id SERIAL PRIMARY KEY,
+    id_produto INT NOT NULL,
+    tipo VARCHAR(20) NOT NULL, -- ENTRADA | SAIDA | AJUSTE (futuro)
+    quantidade NUMERIC(15,3) NOT NULL,
+    observacao TEXT,
+    data_movimentacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_mov_produto FOREIGN KEY (id_produto) REFERENCES produto (id)
+);
+
+CREATE OR REPLACE FUNCTION fn_atualiza_estoque()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.tipo = 'ENTRADA' THEN
+        UPDATE estoque
+           SET quantidade = quantidade + NEW.quantidade,
+               data_atualizacao = CURRENT_TIMESTAMP
+         WHERE id_produto = NEW.id_produto;
+    ELSIF NEW.tipo = 'SAIDA' THEN
+        UPDATE estoque
+           SET quantidade = quantidade - NEW.quantidade,
+               data_atualizacao = CURRENT_TIMESTAMP
+         WHERE id_produto = NEW.id_produto;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS tg_atualiza_estoque ON estoque_movimentacao;
+CREATE TRIGGER tg_atualiza_estoque
+AFTER INSERT ON estoque_movimentacao
+FOR EACH ROW
+EXECUTE FUNCTION fn_atualiza_estoque();
+
+-- View para verificação de quantidade
+CREATE OR REPLACE VIEW vw_estoque_atual AS
+SELECT
+    p.id AS id_produto,
+    p.nome AS produto,
+    c.nome AS categoria,
+    p.unidade,
+    e.quantidade,
+    e.data_atualizacao
+FROM produto p
+LEFT JOIN estoque e ON e.id_produto = p.id
+LEFT JOIN categoria c ON c.id = p.id_categoria
+WHERE p.ativo = TRUE;
+
 CREATE TABLE IF NOT EXISTS categoria_financeira (
     id_categoria SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,

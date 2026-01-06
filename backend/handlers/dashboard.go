@@ -13,10 +13,11 @@ type DashboardHandler struct {
 }
 
 type DashboardCardsResponse struct {
-	TotalEntradasMes      float64 `json:"totalEntradasMes"`
-	TotalSaidasMes        float64 `json:"totalSaidasMes"`
-	TotalRecorrentesEntradas float64 `json:"totalRecorrentesEntradas"`
-	TotalContasFixas       float64 `json:"totalContasFixas"`
+	TotalEstoque              float64 `json:"totalEstoque"`
+	TotalEntradasMes          float64 `json:"totalEntradasMes"`
+	TotalSaidasMes            float64 `json:"totalSaidasMes"`
+	TotalRecorrentesEntradas  float64 `json:"totalRecorrentesEntradas"`
+	TotalContasFixas          float64 `json:"totalContasFixas"`
 	TotalPagamentosContaFixaMes float64 `json:"totalPagamentosContaFixaMes"`
 }
 
@@ -44,6 +45,15 @@ func (h *DashboardHandler) GetCards(c *gin.Context) {
 	mesAtual := int(hoje.Month())
 
 	var response DashboardCardsResponse
+
+	// Total em estoque (soma das movimentações registradas)
+	if err := h.DB.QueryRow(c, `
+		SELECT COALESCE(SUM(valor), 0)
+		FROM estoque_movimentacao
+	`).Scan(&response.TotalEstoque); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao calcular total em estoque"})
+		return
+	}
 
 	// Total de Entradas do Mês
 	err := h.DB.QueryRow(c, `
