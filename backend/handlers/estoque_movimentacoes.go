@@ -66,7 +66,12 @@ func (h *EstoqueMovimentacaoHandler) List(c *gin.Context) {
 
 // GetLastValor retorna o último valor lançado para um produto em estoque_movimentacao
 func (h *EstoqueMovimentacaoHandler) GetLastValor(c *gin.Context) {
-	idProd := c.Param("id")
+	idProdStr := c.Param("idProduto")
+	if idProdStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ID do produto é obrigatório"})
+		return
+	}
+
 	var valor float64
 	err := h.DB.QueryRow(c, `
 		SELECT COALESCE(em.valor, 0)
@@ -74,9 +79,14 @@ func (h *EstoqueMovimentacaoHandler) GetLastValor(c *gin.Context) {
 		WHERE em.id_produto = $1
 		ORDER BY em.data_movimentacao DESC, em.id DESC
 		LIMIT 1
-	`, idProd).Scan(&valor)
-	if err != nil && err != pgx.ErrNoRows {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao buscar valor do produto"})
+	`, idProdStr).Scan(&valor)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// Se não houver registros, retorna 0
+			c.JSON(http.StatusOK, gin.H{"valor": 0})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao buscar valor do produto", "error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"valor": valor})
@@ -84,28 +94,42 @@ func (h *EstoqueMovimentacaoHandler) GetLastValor(c *gin.Context) {
 
 // GetSaldo retorna a quantidade atual em estoque para um produto
 func (h *EstoqueMovimentacaoHandler) GetSaldo(c *gin.Context) {
-	idProd := c.Param("id")
+	idProdStr := c.Param("idProduto")
+	if idProdStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "ID do produto é obrigatório"})
+		return
+	}
+
 	var qtd float64
 	err := h.DB.QueryRow(c, `
 		SELECT COALESCE(quantidade, 0)
 		FROM estoque
 		WHERE id_produto = $1
-	`, idProd).Scan(&qtd)
-	if err != nil && err != pgx.ErrNoRows {
-		// tenta recalcular a partir do histórico
-		var saldoCalc float64
-		calcErr := h.DB.QueryRow(c, `
-			SELECT COALESCE(SUM(
-				CASE WHEN tipo = 'ENTRADA' THEN quantidade ELSE -quantidade END
-			), 0)
-			FROM estoque_movimentacao
-			WHERE id_produto = $1
-		`, idProd).Scan(&saldoCalc)
-		if calcErr != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao buscar saldo do produto"})
+	`, idProdStr).Scan(&qtd)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// Se não houver registro na tabela estoque, calcula a partir do histórico
+			var saldoCalc float64
+			calcErr := h.DB.QueryRow(c, `
+				SELECT COALESCE(SUM(
+					CASE WHEN tipo = 'ENTRADA' THEN quantidade ELSE -quantidade END
+				), 0)
+				FROM estoque_movimentacao
+				WHERE id_produto = $1
+			`, idProdStr).Scan(&saldoCalc)
+			if calcErr != nil {
+				if calcErr == pgx.ErrNoRows {
+					// Se não houver movimentações, retorna 0
+					c.JSON(http.StatusOK, gin.H{"quantidade": 0})
+					return
+				}
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao buscar saldo do produto", "error": calcErr.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"quantidade": saldoCalc})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"quantidade": saldoCalc})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao buscar saldo do produto", "error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"quantidade": qtd})
