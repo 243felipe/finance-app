@@ -46,12 +46,14 @@ func (h *DashboardHandler) GetCards(c *gin.Context) {
 
 	var response DashboardCardsResponse
 
-	// Total em estoque (soma das movimentações registradas)
+	// Total de saídas do estoque hoje (soma das movimentações de saída do dia atual)
 	if err := h.DB.QueryRow(c, `
 		SELECT COALESCE(SUM(valor), 0)
 		FROM estoque_movimentacao
+		WHERE tipo = 'SAIDA'
+		  AND DATE(data_movimentacao) = CURRENT_DATE
 	`).Scan(&response.TotalEstoque); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao calcular total em estoque"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao calcular total de saídas do estoque hoje"})
 		return
 	}
 

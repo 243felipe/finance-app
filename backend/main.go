@@ -65,6 +65,7 @@ func main() {
 			secured.PUT("/auth/profile", authHandler.UpdateProfile)
 
 			secured.GET("/products", productHandler.List)
+			secured.GET("/products/com-entrada", productHandler.ListComEntrada)
 			secured.GET("/products/:id", productHandler.Get)
 			secured.POST("/products", productHandler.Create)
 			secured.PUT("/products/:id", productHandler.Update)

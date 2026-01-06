@@ -186,9 +186,52 @@ func (h *ProductHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// ListComEntrada retorna apenas produtos que têm entrada no estoque
+func (h *ProductHandler) ListComEntrada(c *gin.Context) {
+	rows, err := h.DB.Query(c, `
+		SELECT DISTINCT
+			p.id,
+			p.nome,
+			p.descricao,
+			p.id_categoria,
+			p.unidade,
+			p.ativo,
+			p.data_cadastro,
+			p.data_atualizacao,
+			c.nome as categoria
+		FROM produto p
+		INNER JOIN estoque_movimentacao etq ON etq.id_produto = p.id
+		LEFT JOIN categoria c ON c.id = p.id_categoria
+		WHERE etq.tipo = 'ENTRADA'
+		ORDER BY p.nome`)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao listar produtos com entrada"})
+		return
+	}
+	defer rows.Close()
 
+	var products []models.Product
+	for rows.Next() {
+		var p models.Product
+		if err := rows.Scan(
+			&p.ID,
+			&p.Nome,
+			&p.Descricao,
+			&p.IDCategoria,
+			&p.Unidade,
+			&p.Ativo,
+			&p.DataCadastro,
+			&p.DataAtualiza,
+			&p.Categoria,
+		); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao ler produto"})
+			return
+		}
+		products = append(products, p)
+	}
 
-
+	c.JSON(http.StatusOK, products)
+}
 
 
 

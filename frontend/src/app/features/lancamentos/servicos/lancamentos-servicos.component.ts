@@ -476,7 +476,7 @@ export class LancamentosServicosComponent implements OnInit {
   }
 
   private loadProdutos(): void {
-    this.produtoService.listar().subscribe({
+    this.produtoService.listarComEntrada().subscribe({
       next: (data: Produto[]) => {
         this.produtosOptions = (data || []).map((p) => ({ label: p.nome, value: p.id }));
       },

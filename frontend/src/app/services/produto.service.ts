@@ -33,6 +33,10 @@ export class ProdutoService {
     return this.http.get<Produto[]>(`${this.baseUrl}/products`);
   }
 
+  listarComEntrada(): Observable<Produto[]> {
+    return this.http.get<Produto[]>(`${this.baseUrl}/products/com-entrada`);
+  }
+
   obter(id: number): Observable<Produto> {
     return this.http.get<Produto>(`${this.baseUrl}/products/${id}`);
   }
