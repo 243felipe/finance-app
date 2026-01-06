@@ -115,17 +115,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private carregarDados(): void {
+    console.log('=== DASHBOARD: Iniciando carregamento de dados ===');
     this.atualizarSaudacao();
     this.loading = true;
     
     // Carrega cards e gráficos em paralelo
+    console.log('=== DASHBOARD: Fazendo requisição para getCards() ===');
     this.dashboardService.getCards().subscribe({
       next: (cardsData) => {
+        console.log('=== DASHBOARD: Resposta recebida de getCards() ===');
+        console.log('Tipo da resposta:', typeof cardsData);
+        console.log('É um objeto?', cardsData instanceof Object);
+        console.log('Resposta completa:', JSON.stringify(cardsData, null, 2));
+        console.log('Propriedades do objeto:', Object.keys(cardsData));
+        console.log('Valores individuais:', {
+          totalEstoque: cardsData.totalEstoque,
+          totalEntradasMes: cardsData.totalEntradasMes,
+          totalSaidasMes: cardsData.totalSaidasMes,
+          totalRecorrentesEntradas: cardsData.totalRecorrentesEntradas,
+          totalContasFixas: cardsData.totalContasFixas,
+          totalPagamentosContaFixaMes: cardsData.totalPagamentosContaFixaMes
+        });
         this.atualizarCards(cardsData);
         this.loading = false;
+        console.log('=== DASHBOARD: Cards atualizados, loading = false ===');
       },
       error: (err) => {
-        console.error('Erro ao carregar cards do dashboard', err);
+        console.error('=== DASHBOARD: ERRO ao carregar cards ===', err);
+        console.error('Detalhes do erro:', {
+          message: err.message,
+          status: err.status,
+          error: err.error,
+          url: err.url
+        });
         this.loading = false;
       }
     });
@@ -181,42 +203,75 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private atualizarCards(data: DashboardCards): void {
-    this.cards = [
+    console.log('=== DASHBOARD: atualizarCards() chamado ===');
+    console.log('Dados recebidos:', data);
+    console.log('Tipo dos dados:', typeof data);
+    console.log('É um objeto?', data instanceof Object);
+    console.log('Propriedades do objeto:', Object.keys(data));
+    
+    // Garante que os valores sejam números
+    const totalEstoque = Number(data.totalEstoque) || 0;
+    const totalSaidasMes = Number(data.totalSaidasMes) || 0;
+    const totalRecorrentesEntradas = Number(data.totalRecorrentesEntradas) || 0;
+    const totalContasFixas = Number(data.totalContasFixas) || 0;
+    const totalPagamentosContaFixaMes = Number(data.totalPagamentosContaFixaMes) || 0;
+    
+    console.log('Valores convertidos para número:', {
+      totalEstoque,
+      totalSaidasMes,
+      totalRecorrentesEntradas,
+      totalContasFixas,
+      totalPagamentosContaFixaMes
+    });
+    
+    const cardsFormatados = [
       { 
         label: 'Total em Estoque', 
-        value: this.formatCurrency(data.totalEstoque), 
+        value: this.formatCurrency(totalEstoque), 
         change: '', 
         icon: 'pi pi-arrow-up' 
       },
       { 
         label: 'Total Saídas (mês)', 
-        value: this.formatCurrency(data.totalSaidasMes), 
+        value: this.formatCurrency(totalSaidasMes), 
         change: '', 
         icon: 'pi pi-arrow-down' 
       },
       { 
         label: 'Recorrentes - Entradas', 
-        value: this.formatCurrency(data.totalRecorrentesEntradas), 
+        value: this.formatCurrency(totalRecorrentesEntradas), 
         change: '', 
         icon: 'pi pi-refresh' 
       },
       { 
         label: 'Contas Fixas', 
-        value: this.formatCurrency(data.totalContasFixas), 
+        value: this.formatCurrency(totalContasFixas), 
         change: '', 
         icon: 'pi pi-wallet' 
       },
       { 
         label: 'Pagto Conta Fixa (mês)', 
-        value: this.formatCurrency(data.totalPagamentosContaFixaMes), 
+        value: this.formatCurrency(totalPagamentosContaFixaMes), 
         change: '', 
         icon: 'pi pi-calendar' 
       }
     ];
+    
+    console.log('Cards formatados:', cardsFormatados);
+    this.cards = cardsFormatados;
+    console.log('=== DASHBOARD: this.cards atualizado ===');
+    console.log('this.cards após atribuição:', this.cards);
   }
 
-  formatCurrency(value: number): string {
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  formatCurrency(value: number | null | undefined): string {
+    const numValue = Number(value);
+    if (isNaN(numValue) || numValue === null || numValue === undefined) {
+      console.log(`formatCurrency: valor inválido retornando R$ 0,00. Valor original:`, value, 'Tipo:', typeof value);
+      return 'R$ 0,00';
+    }
+    const formatted = numValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    console.log(`formatCurrency: ${value} -> ${formatted}`);
+    return formatted;
   }
 
   private setupCharts(data: DashboardCharts): void {

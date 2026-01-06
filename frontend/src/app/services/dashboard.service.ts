@@ -45,7 +45,11 @@ export class DashboardService {
   constructor(private http: HttpClient) {}
 
   getCards(): Observable<DashboardCards> {
-    return this.http.get<DashboardCards>(`${this.baseUrl}/cards`);
+    console.log('=== DASHBOARD SERVICE: getCards() chamado ===');
+    console.log('URL da requisição:', `${this.baseUrl}/cards`);
+    const observable = this.http.get<DashboardCards>(`${this.baseUrl}/cards`);
+    console.log('Observable criado, aguardando resposta...');
+    return observable;
   }
 
   getCharts(): Observable<DashboardCharts> {
