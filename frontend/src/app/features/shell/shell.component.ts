@@ -81,6 +81,14 @@ export class ShellComponent implements AfterViewInit, OnDestroy {
   menu: MenuItem[] = [
     { label: 'Dashboard', icon: 'pi pi-home', route: '/dashboard' },
     {
+      label: 'Clientes',
+      icon: 'pi pi-users',
+      route: '',
+      children: [
+        { label: 'Cadastro de Cliente', icon: 'pi pi-user-plus', route: '/clientes' }
+      ]
+    },
+    {
       label: 'Cadastros',
       icon: 'pi pi-briefcase',
       route: '',

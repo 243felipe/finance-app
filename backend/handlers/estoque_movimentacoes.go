@@ -74,9 +74,10 @@ func (h *EstoqueMovimentacaoHandler) GetLastValor(c *gin.Context) {
 
 	var valor float64
 	err := h.DB.QueryRow(c, `
-		SELECT COALESCE(em.valor, 0)
+		SELECT COALESCE(em.valor / NULLIF(em.quantidade, 0), 0)
 		FROM estoque_movimentacao em
 		WHERE em.id_produto = $1
+		  AND em.tipo = 'ENTRADA'
 		ORDER BY em.data_movimentacao DESC, em.id DESC
 		LIMIT 1
 	`, idProdStr).Scan(&valor)

@@ -21,6 +21,7 @@ type lancamentoServicoItemPayload struct {
 }
 
 type lancamentoServicoPayload struct {
+	IDCliente  int64                          `json:"idCliente" binding:"required"`
 	Descricao  string                          `json:"descricao" binding:"required"`
 	Observacao string                          `json:"observacao"`
 	Itens      []lancamentoServicoItemPayload  `json:"itens" binding:"required"`
@@ -28,8 +29,9 @@ type lancamentoServicoPayload struct {
 
 func (h *LancamentoServicoHandler) List(c *gin.Context) {
 	rows, err := h.DB.Query(c, `
-		SELECT ls.id, ls.descricao, ls.observacao, ls.data_lancamento
+		SELECT ls.id, ls.id_cliente, ls.descricao, ls.observacao, ls.data_lancamento, c.nome_razao_social
 		FROM lancamento_servico ls
+		LEFT JOIN cliente c ON c.id = ls.id_cliente
 		ORDER BY ls.id DESC
 		LIMIT 200
 	`)
@@ -42,7 +44,7 @@ func (h *LancamentoServicoHandler) List(c *gin.Context) {
 	var list []models.LancamentoServico
 	for rows.Next() {
 		var s models.LancamentoServico
-		if err := rows.Scan(&s.ID, &s.Descricao, &s.Observacao, &s.DataLancamento); err != nil {
+		if err := rows.Scan(&s.ID, &s.IDCliente, &s.Descricao, &s.Observacao, &s.DataLancamento, &s.Cliente); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao ler lançamento de serviço"})
 			return
 		}
@@ -56,10 +58,11 @@ func (h *LancamentoServicoHandler) Get(c *gin.Context) {
 	id := c.Param("id")
 	var s models.LancamentoServico
 	err := h.DB.QueryRow(c, `
-		SELECT ls.id, ls.descricao, ls.observacao, ls.data_lancamento
+		SELECT ls.id, ls.id_cliente, ls.descricao, ls.observacao, ls.data_lancamento, c.nome_razao_social
 		FROM lancamento_servico ls
+		LEFT JOIN cliente c ON c.id = ls.id_cliente
 		WHERE ls.id = $1
-	`, id).Scan(&s.ID, &s.Descricao, &s.Observacao, &s.DataLancamento)
+	`, id).Scan(&s.ID, &s.IDCliente, &s.Descricao, &s.Observacao, &s.DataLancamento, &s.Cliente)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Serviço não encontrado"})
 		return
@@ -109,11 +112,11 @@ func (h *LancamentoServicoHandler) Create(c *gin.Context) {
 
 	var serv models.LancamentoServico
 	err = tx.QueryRow(c, `
-		INSERT INTO lancamento_servico (descricao, observacao)
-		VALUES ($1, NULLIF($2, ''))
-		RETURNING id, descricao, observacao, data_lancamento
-	`, payload.Descricao, payload.Observacao).
-		Scan(&serv.ID, &serv.Descricao, &serv.Observacao, &serv.DataLancamento)
+		INSERT INTO lancamento_servico (id_cliente, descricao, observacao)
+		VALUES ($1, $2, NULLIF($3, ''))
+		RETURNING id, id_cliente, descricao, observacao, data_lancamento
+	`, payload.IDCliente, payload.Descricao, payload.Observacao).
+		Scan(&serv.ID, &serv.IDCliente, &serv.Descricao, &serv.Observacao, &serv.DataLancamento)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao criar lançamento de serviço"})
 		return
@@ -124,7 +127,7 @@ func (h *LancamentoServicoHandler) Create(c *gin.Context) {
 		// obtém último valor de entrada para o produto
 		var precoEntrada float64
 		priceErr := tx.QueryRow(c, `
-			SELECT COALESCE(em.valor, 0)
+			SELECT COALESCE(em.valor / NULLIF(em.quantidade, 0), 0)
 			FROM estoque_movimentacao em
 			WHERE em.id_produto = $1 AND em.tipo = 'ENTRADA'
 			ORDER BY em.data_movimentacao DESC, em.id DESC
@@ -231,6 +234,16 @@ func (h *LancamentoServicoHandler) Create(c *gin.Context) {
 		}
 	}
 
+	// registra histórico do cliente
+	_, err = tx.Exec(c, `
+		INSERT INTO cliente_historico (id_cliente, tipo_evento, descricao)
+		VALUES ($1, 'ORDEM_SERVICO', $2)
+	`, payload.IDCliente, payload.Descricao)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao registrar histórico do cliente"})
+		return
+	}
+
 	if err := tx.Commit(c); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao confirmar transação"})
 		return
@@ -318,10 +331,11 @@ func (h *LancamentoServicoHandler) Update(c *gin.Context) {
 	// atualiza cabeçalho
 	_, err = tx.Exec(c, `
 		UPDATE lancamento_servico
-		   SET descricao=$1,
-		       observacao=NULLIF($2,'')
-		 WHERE id=$3
-	`, payload.Descricao, payload.Observacao, id)
+		   SET id_cliente=$1,
+		       descricao=$2,
+		       observacao=NULLIF($3,'')
+		 WHERE id=$4
+	`, payload.IDCliente, payload.Descricao, payload.Observacao, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Erro ao atualizar cabeçalho"})
 		return
@@ -338,7 +352,7 @@ func (h *LancamentoServicoHandler) Update(c *gin.Context) {
 	for _, it := range payload.Itens {
 		var precoEntrada float64
 		priceErr := tx.QueryRow(c, `
-			SELECT COALESCE(em.valor, 0)
+			SELECT COALESCE(em.valor / NULLIF(em.quantidade, 0), 0)
 			FROM estoque_movimentacao em
 			WHERE em.id_produto = $1 AND em.tipo = 'ENTRADA'
 			ORDER BY em.data_movimentacao DESC, em.id DESC

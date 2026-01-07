@@ -45,6 +45,7 @@ func main() {
 	listaComprasHandler := handlers.ListaComprasHandler{DB: pool}
 	itemListaComprasHandler := handlers.ItemListaComprasHandler{DB: pool}
 	dashboardHandler := handlers.DashboardHandler{DB: pool}
+	clienteHandler := handlers.ClienteHandler{DB: pool}
 
 	// Responde na raiz para evitar 404 em verificações externas.
 	router.GET("/", func(c *gin.Context) {
@@ -84,6 +85,15 @@ func main() {
 			secured.DELETE("/estoque-movimentacoes/:id", estoqueMovHandler.Delete)
 			secured.GET("/estoque-movimentacoes/ultimo-valor/:idProduto", estoqueMovHandler.GetLastValor)
 			secured.GET("/estoque/saldo/:idProduto", estoqueMovHandler.GetSaldo)
+
+			// Clientes
+			secured.GET("/clientes", clienteHandler.List)
+			secured.GET("/clientes/:id", clienteHandler.Get)
+			secured.POST("/clientes", clienteHandler.Create)
+			secured.PUT("/clientes/:id", clienteHandler.Update)
+			secured.DELETE("/clientes/:id", clienteHandler.Delete)
+			secured.GET("/clientes/:id/historico", clienteHandler.ListHistorico)
+			secured.POST("/clientes/:id/historico", clienteHandler.AddHistorico)
 
 			secured.GET("/lancamentos-servicos", lancamentoServicoHandler.List)
 			secured.POST("/lancamentos-servicos", lancamentoServicoHandler.Create)

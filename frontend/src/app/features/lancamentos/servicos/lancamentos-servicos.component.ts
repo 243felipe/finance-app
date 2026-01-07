@@ -9,27 +9,15 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
 import { ProdutoService, Produto } from '../../../services/produto.service';
-import { LancamentoServicoService, LancamentoServicoPayload } from '../../../services/lancamento-servico.service';
+import { ClienteService, Cliente } from '../../../services/cliente.service';
+import { LancamentoServicoService, LancamentoServicoPayload, LancamentoServico } from '../../../services/lancamento-servico.service';
 import { EstoqueMovimentacaoService } from '../../../services/estoque-movimentacao.service';
 
 type ItemForm = {
   id_produto: number | null;
   quantidade: number | null;
+  valorUnitario: number | null;
   valor: number | null;
-};
-
-type LancamentoServico = {
-  id: number;
-  descricao: string;
-  observacao?: string;
-  dataLancamento: string;
-  itens?: Array<{
-    id: number;
-    idProduto: number;
-    quantidade: number;
-    valor: number;
-    produto?: string | null;
-  }>;
 };
 
 @Component({
@@ -54,6 +42,7 @@ type LancamentoServico = {
         <table *ngIf="!loading && servicos.length > 0" class="simple-table">
           <thead>
             <tr>
+              <th>Cliente</th>
               <th>Descrição</th>
               <th>Observação</th>
               <th>Data</th>
@@ -62,6 +51,7 @@ type LancamentoServico = {
           </thead>
           <tbody>
             <tr *ngFor="let s of servicos">
+              <td>{{ s.cliente || s.idCliente }}</td>
               <td>{{ s.descricao }}</td>
               <td>{{ s.observacao || '-' }}</td>
               <td>{{ s.dataLancamento | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -83,6 +73,17 @@ type LancamentoServico = {
         [closable]="false"
       >
         <form [formGroup]="form" class="dialog-form">
+          <div class="field">
+            <label>Cliente</label>
+            <div class="prefix-input readonly-box">
+              <span>{{ clienteSelecionado?.nomeRazaoSocial || 'Selecione um cliente' }}</span>
+              <button pButton type="button" label="Buscar" class="p-button-text" (click)="openClienteModal()"></button>
+            </div>
+            <small *ngIf="form.get('id_cliente')?.invalid && form.get('id_cliente')?.touched" class="error">
+              Informe o cliente.
+            </small>
+          </div>
+
           <div class="field">
             <label for="descricao">Descrição</label>
             <input id="descricao" type="text" pInputText formControlName="descricao" placeholder="Ex: Troca de 2 pneus" />
@@ -115,11 +116,15 @@ type LancamentoServico = {
               </div>
               <div class="field">
                 <label>Qtd</label>
-                <input type="number" min="0" step="0.001" pInputText formControlName="quantidade" />
+                <input type="number" min="0" step="0.001" pInputText formControlName="quantidade" (input)="onQuantidadeChange(i)" />
               </div>
               <div class="field">
                 <label>Valor</label>
-                <input type="number" min="0" step="0.01" pInputText formControlName="valor" [readonly]="true" />
+                <input type="hidden" formControlName="valor" />
+                <div class="prefix-input readonly-box">
+                  <span>R$</span>
+                  <span>{{ displayValor(i) }}</span>
+                </div>
               </div>
               <div class="field actions-inline">
                 <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-danger" (click)="removeItem(i)"></button>
@@ -135,17 +140,55 @@ type LancamentoServico = {
       </p-dialog>
 
       <p-dialog
+        header="Pesquisar cliente"
+        [(visible)]="clienteModalVisible"
+        [modal]="true"
+        [style]="{ width: '720px' }"
+        [closable]="true"
+      >
+        <div class="card">
+          <table class="simple-table" *ngIf="clientesLista.length > 0; else semCli">
+            <thead>
+              <tr>
+                <th>Nome / Razão social</th>
+                <th>Fantasia</th>
+                <th>CPF/CNPJ</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of clientesLista" [class.selected]="clienteSelecionado?.id === c.id">
+                <td>{{ c.nomeRazaoSocial }}</td>
+                <td>{{ c.nomeFantasia || '-' }}</td>
+                <td>{{ c.cpfCnpj }}</td>
+                <td class="actions">
+                  <button pButton type="button" label="Selecionar" class="p-button-text" (click)="selecionarCliente(c)"></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ng-template #semCli>
+            <p>Nenhum cliente encontrado.</p>
+          </ng-template>
+        </div>
+        <div class="dialog-actions">
+          <button pButton type="button" label="Fechar" class="p-button-text" (click)="clienteModalVisible = false"></button>
+          <button pButton type="button" label="Adicionar" [disabled]="!clienteSelecionado" (click)="aplicarCliente()"></button>
+        </div>
+      </p-dialog>
+
+      <p-dialog
         header="Itens do serviço"
         [(visible)]="dialogViewVisible"
         [modal]="true"
         [style]="{ width: '700px' }"
         [closable]="true"
       >
-        <div *ngIf="currentView">
-            <p><strong>Descrição:</strong> {{ currentView?.descricao }}</p>
-          <p><strong>Observação:</strong> {{ currentView?.observacao || '-' }}</p>
-          <p><strong>Data:</strong> {{ currentView?.dataLancamento | date:'dd/MM/yyyy HH:mm' }}</p>
-          <table class="simple-table" *ngIf="currentView?.itens?.length">
+        <div *ngIf="currentView as view">
+            <p><strong>Descrição:</strong> {{ view.descricao }}</p>
+          <p><strong>Observação:</strong> {{ view.observacao || '-' }}</p>
+          <p><strong>Data:</strong> {{ view.dataLancamento | date:'dd/MM/yyyy HH:mm' }}</p>
+          <table class="simple-table" *ngIf="view.itens?.length">
             <thead>
               <tr>
                 <th>Produto</th>
@@ -155,7 +198,7 @@ type LancamentoServico = {
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let it of currentView?.itens">
+              <tr *ngFor="let it of view.itens">
                 <td>{{ it.produto || it.idProduto }}</td>
                 <td>{{ it.quantidade }}</td>
                 <td>{{ it.valor | currency: 'BRL':'symbol':'1.2-2' }}</td>
@@ -163,7 +206,7 @@ type LancamentoServico = {
               </tr>
             </tbody>
           </table>
-          <p *ngIf="!currentView?.itens?.length">Sem itens.</p>
+          <p *ngIf="!view.itens?.length">Sem itens.</p>
         </div>
       </p-dialog>
     </section>
@@ -292,11 +335,43 @@ type LancamentoServico = {
       color: #ef4444;
       font-size: 0.82rem;
     }
+    .prefix-input {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.4rem 0.6rem;
+    }
+    .prefix-input span {
+      font-weight: 600;
+      color: #111827;
+    }
+    .prefix-input input {
+      border: none;
+      flex: 1;
+      background: transparent;
+      outline: none;
+    }
+    .prefix-input button {
+      margin-left: auto;
+    }
+    .simple-table tr.selected {
+      background: #e0f7f6;
+    }
+    .readonly-box {
+      width: 100%;
+      justify-content: flex-start;
+    }
   `]
 })
 export class LancamentosServicosComponent implements OnInit {
   servicos: LancamentoServico[] = [];
   produtosOptions: { label: string; value: number }[] = [];
+  clientesLista: Cliente[] = [];
+  clienteSelecionado: Cliente | null = null;
+  clienteModalVisible = false;
   dialogVisible = false;
   dialogViewVisible = false;
   loading = false;
@@ -311,9 +386,11 @@ export class LancamentosServicosComponent implements OnInit {
     private produtoService: ProdutoService,
     private estoqueMovService: EstoqueMovimentacaoService,
     private lancamentoServicoService: LancamentoServicoService,
+    private clienteService: ClienteService,
     private messageService: MessageService
   ) {
     this.form = this.fb.group({
+      id_cliente: [null, Validators.required],
       descricao: ['', [Validators.required, Validators.maxLength(150)]],
       observacao: [''],
       itens: this.fb.array([])
@@ -337,15 +414,17 @@ export class LancamentosServicosComponent implements OnInit {
     this.dialogVisible = false;
     this.dialogViewVisible = false;
     this.currentView = null;
-    this.form.reset({ descricao: '', observacao: '' });
+    this.form.reset({ id_cliente: null, descricao: '', observacao: '' });
     this.itens.clear();
     this.editingId = null;
+    this.clienteSelecionado = null;
   }
 
   addItem(): void {
     const group = this.fb.group({
       id_produto: [null, Validators.required],
       quantidade: [0, [Validators.required, Validators.min(0)]],
+      valorUnitario: [0, [Validators.min(0)]],
       valor: [0, [Validators.required, Validators.min(0)]]
     });
     this.itens.push(group);
@@ -361,8 +440,13 @@ export class LancamentosServicosComponent implements OnInit {
     if (!idProd) return;
     this.estoqueMovService.ultimoValor(idProd).subscribe({
       next: (res) => {
-        const valor = res?.valor ?? 0;
-        group.patchValue({ valor });
+        const valorUnitario = res?.valor ?? 0;
+        const quantidade = Number(group.value.quantidade) || 1;
+        group.patchValue({
+          quantidade,
+          valorUnitario,
+          valor: quantidade * valorUnitario
+        });
       },
       error: () => {}
     });
@@ -374,6 +458,25 @@ export class LancamentosServicosComponent implements OnInit {
     });
   }
 
+  formatCurrencyBR(value: number | null | undefined, withSymbol: boolean = true): string {
+    const num = Number(value) || 0;
+    const formatted = num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    return withSymbol ? formatted : formatted.replace('R$', '').trim();
+  }
+
+  displayValor(index: number): string {
+    const ctrl = this.itens.at(index);
+    const val = ctrl ? Number((ctrl as FormGroup).value?.valor ?? 0) : 0;
+    return this.formatCurrencyBR(val, false);
+  }
+
+  onQuantidadeChange(index: number): void {
+    const group = this.itens.at(index) as FormGroup;
+    const quantidade = Number(group.value.quantidade) || 0;
+    const valorUnitario = Number(group.value.valorUnitario) || 0;
+    group.patchValue({ valor: quantidade * valorUnitario });
+  }
+
   salvar(): void {
     if (this.form.invalid || this.itens.length === 0) {
       this.form.markAllAsTouched();
@@ -381,12 +484,13 @@ export class LancamentosServicosComponent implements OnInit {
     }
     this.saving = true;
     const payload: LancamentoServicoPayload = {
+      idCliente: this.form.value.id_cliente,
       descricao: this.form.value.descricao,
       observacao: this.form.value.observacao,
       itens: this.itens.value.map((i: any) => ({
         idProduto: i.id_produto,
         quantidade: Number(i.quantidade) || 0,
-        valor: Number(i.valor) || 0
+        valor: Number(i.valorUnitario ?? i.valor) || 0
       }))
     };
 
@@ -426,15 +530,22 @@ export class LancamentosServicosComponent implements OnInit {
       next: (data) => {
         this.editingId = data.id;
         this.form.patchValue({
+          id_cliente: data.idCliente,
           descricao: data.descricao,
           observacao: data.observacao || ''
         });
+        if (data.idCliente) {
+          this.loadClienteById(data.idCliente);
+        } else {
+          this.clienteSelecionado = null;
+        }
         this.itens.clear();
         (data.itens || []).forEach((it) => {
           const group = this.fb.group({
             id_produto: [it.idProduto, Validators.required],
             quantidade: [it.quantidade, [Validators.required, Validators.min(0)]],
-            valor: [it.valor, [Validators.required, Validators.min(0)]]
+            valorUnitario: [it.valor, [Validators.min(0)]],
+            valor: [(it.valor || 0) * (it.quantidade || 0), [Validators.required, Validators.min(0)]]
           });
           this.itens.push(group);
           this.saldoMap[it.idProduto] = 0;
@@ -475,6 +586,34 @@ export class LancamentosServicosComponent implements OnInit {
     });
   }
 
+  openClienteModal(): void {
+    this.clienteModalVisible = true;
+    this.loadClientes();
+  }
+
+  private loadClientes(): void {
+    this.clienteService.listar().subscribe({
+      next: (data) => (this.clientesLista = data || []),
+      error: () => (this.clientesLista = [])
+    });
+  }
+
+  private loadClienteById(id: number): void {
+    this.clienteService.obter(id).subscribe({
+      next: (cli) => (this.clienteSelecionado = cli),
+      error: () => (this.clienteSelecionado = { id, nomeRazaoSocial: `Cliente #${id}` } as Cliente)
+    });
+  }
+
+  selecionarCliente(cli: Cliente): void {
+    this.clienteSelecionado = cli;
+  }
+
+  aplicarCliente(): void {
+    if (!this.clienteSelecionado) return;
+    this.form.patchValue({ id_cliente: this.clienteSelecionado.id });
+    this.clienteModalVisible = false;
+  }
   private loadProdutos(): void {
     this.produtoService.listarComEntrada().subscribe({
       next: (data: Produto[]) => {

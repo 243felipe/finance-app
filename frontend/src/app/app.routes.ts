@@ -44,6 +44,11 @@ export const routes: Routes = [
           import('./features/cadastros/formas-pagamento/formas-pagamento.component').then((c) => c.FormasPagamentoComponent)
       },
       {
+        path: 'clientes',
+        loadComponent: () => import('./features/clientes/clientes.component').then((c) => c.ClientesComponent),
+        data: { title: 'Cadastro de Cliente' }
+      },
+      {
         path: 'lancamentos/receita/salario',
         loadComponent: () =>
           import('./features/lancamentos/receita-salario/receita-salario.component').then((c) => c.ReceitaSalarioComponent)

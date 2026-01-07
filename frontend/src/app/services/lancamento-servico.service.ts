@@ -10,6 +10,7 @@ export interface LancamentoServicoItemPayload {
 }
 
 export interface LancamentoServicoPayload {
+  idCliente: number;
   descricao: string;
   observacao?: string;
   itens: LancamentoServicoItemPayload[];
@@ -17,6 +18,8 @@ export interface LancamentoServicoPayload {
 
 export interface LancamentoServico {
   id: number;
+  idCliente?: number;
+  cliente?: string | null;
   descricao: string;
   observacao?: string;
   dataLancamento: string;

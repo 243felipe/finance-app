@@ -4,6 +4,8 @@ import "time"
 
 type LancamentoServico struct {
 	ID            int64                     `json:"id"`
+	IDCliente     int64                     `json:"idCliente"`
+	Cliente       *string                   `json:"cliente,omitempty"`
 	Descricao     string                    `json:"descricao"`
 	Observacao    *string                   `json:"observacao,omitempty"`
 	DataLancamento time.Time                `json:"dataLancamento"`
